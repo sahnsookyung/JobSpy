@@ -33,7 +33,7 @@ class JapanDev(Scraper):
     ):
         site = Site(Site.JAPANDEV)
         super().__init__(site, proxies=proxies, ca_cert=ca_cert, user_agent=user_agent)
-        self.base_url = "https://japan-dev.com"
+        self.base_url = "https://japan-dev.com/japan-jobs-relocation"
 
     def _parse_salary_to_comp(self, salary_text: str | None) -> Compensation | None:
         if not salary_text:
@@ -154,7 +154,7 @@ class JapanDev(Scraper):
             page = setup_page(context, block_resources=True)
 
             # NOTE: leaving your existing entry point; adjust if you scrape a different listing route.
-            url = f"{self.base_url}/japan-jobs-relocation"
+            url = f"{self.base_url}"
             if scraper_input.search_term:
                 url += "?query=" + scraper_input.search_term
 
