@@ -1,0 +1,401 @@
+"id","site","job_url","job_url_direct","title","company","location","date_posted","job_type","salary_source","interval","min_amount","max_amount","currency","is_remote","job_level","job_function","listing_type","emails","description","company_industry","company_url","company_logo","company_url_direct","company_addresses","company_num_employees","company_revenue","company_description","skills","experience_range","company_rating","company_reviews_count","vacancy_count","work_from_home_type"
+"","tokyodev","https://www.tokyodev.com/companies/moneyforward/jobs/security-specialist-product-security-ciso-office-tokyo","/jobs/apply-from-abroad","Security Specialist (Product Security), CISO Office, Tokyo","Money Forward","Tokyo, Japan","2026-01-25","","direct_data","yearly",8000000.0,17000000.0,"JPY",True,"","","","","Language requirements: Business English
+
+At Money Forward, we develop a wide range of popular services, including our automated personal financial management tool “Money Forward ME” and the “Money Forward Cloud” suite for businesses. Our ecosystem is powered by advanced technologies such as “Account Aggregation” and our single sign-on system, “Money Forward ID.”
+
+As our services handle sensitive financial data, we maintain the highest standards of security. The CISO Office works closely with our business units to ensure and enhance the security of our products. This includes the governance and visualization of major cloud platforms like AWS and GCP, as well as the design, implementation, and operation of common security features such as WAF. Additionally, the CISO Office is responsible for strengthening the security of our internal information systems.
+
+To provide a safe and secure experience for even more users, we are looking for a Security Specialist to join our team.
+
+About the CISO Office
+
+Our mission is to “Maximize the value delivered to our customers through security.” We define and create the ideal security state for the entire Money Forward Group.
+
+Preventing service downtime and information leakage is, of course, critical. However, that is only one part of what we value. Excessive security measures can slow down development, potentially reducing or delaying the value we provide to our customers. As security professionals, we constantly ask ourselves how we can maximize customer value and implement the most optimized security solutions to achieve that goal.
+
+Security Principles
+
+We consider the ideal state of security and our organization through three core themes:
+
+Embedded security in business strategy. Security does not exist in a vacuum. We design security measures in alignment with business strategies, taking into account the current business phase, costs, projected revenue, and potential loss in the event of a risk.
+Advanced balancing between security and experience. The highest level of security is not always the “right” answer. Over-securing can increase costs and compromise user convenience. We must assess risks and always consider the most suitable security measures. Instead of simply avoiding risk, we sometimes choose to take calculated risks to pursue maximum user value. To achieve a sophisticated balance between convenience and security, we actively promote automation and autonomous systems.
+Autonomous and scalable organization of security. As the Money Forward Group grows into a larger development organization, we aim to deliver even greater value. If the CISO Office handles every single security function, we will become a bottleneck and fail to scale. Each development department must be able to build secure services autonomously. The CISO Office focuses on building the frameworks and providing the support necessary to enable this autonomy.
+Responsibilities
+
+In this position, you will leverage your knowledge and experience in coding and infrastructure to maintain and enhance the security of Money Forward in collaboration with developers and IT infrastructure teams. As a Product Security Specialist, you will drive the following initiatives alongside other security specialists in the CISO Office:
+
+Establishment of security guardrails for AWS, Azure, and GCP environments.
+In-house security consulting: Providing technical advice on security and conducting architecture reviews for our developers.
+Vulnerability assessments and penetration testing: Performing or supporting security evaluations.
+Vulnerability intelligence: Collecting and verifying vulnerability information, including OSINT (Open Source Intelligence).
+Security tool development: Developing tools and scripts to automate or enhance security.
+Framework implementation: Implementing and deploying security frameworks such as NIST CSF and CIS Controls.
+DevSecOps implementation: Integrating security into modern development workflows, including K8s, Docker, and CI/CD pipelines.
+Requirements
+Foundational understanding of computer science, including networking, operating systems, data structures, and cryptography.
+Experience in software development with at least one programming language, or hands-on experience practicing Security by Design.
+Business-level English communication skills.
+Knowledge or experience in any of the following areas:
+Vulnerability assessment
+Penetration testing or Red Teaming operations
+Forensics, malware analysis, or incident response
+Cloud security
+Architecture reviews
+Building and operating DevSecOps workflows
+Implementation and operation of security solutions (e.g., WAF, IDS/IPS, SIEM)
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Business-level Japanese communication skills.
+Experience participating in CTFs (Capture The Flag).
+Experience in bug hunting or obtaining CVEs (Common Vulnerabilities and Exposures).
+Relevant certifications such as CISSP, CISM, OSCP, GCIH, etc.
+Deep understanding of Authentication and Authorization (e.g., OIDC, OAuth).
+Experience in security-related operations within the Financial or Fintech industry (e.g., knowledge of FISC guidelines).
+Experience in AI development and/or experience in using AI tools to improve development processes.
+Money Forward recently announced our AI Strategy roadmap which focuses on improving AI-driven operational efficiencies, as well as integrating AI agents into our products to deliver better value to our users.
+Compensation
+
+¥8,004,000 ~ ¥17,004,000 annually.","","","","","","","","","Apply from abroad, IT Infrastructure, Security","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/moneyforward/jobs/ai-program-manager-productivity-innovation-department-tokyo","/jobs/apply-from-abroad","AI Program Manager, Productivity Innovation Department, Tokyo","Money Forward","Tokyo, Japan","2026-01-25","","direct_data","yearly",7900000.0,12000000.0,"JPY",True,"","","","","Language requirements: Business English
+
+The SMB Product Development Division is seeking a strategic and execution-focused AI Program Manager to drive our AI transformation. While your primary initial focus will be leading the AI Innovation Hub, this role is designed for a change agent capable of managing a portfolio of AI initiatives.
+
+Your mission is to act as a bridge between technical potential and business value—stimulating high-quality ideas, incubating them into impactful PoCs, and driving the cultural and operational changes required to make AI a natural part of our engineering, product, and design DNA. You will look beyond single projects to build a sustainable engine for innovation and productivity.
+
+Responsibilities
+
+1. Strategic Program Management & Initiative Leadership
+
+Lead the AI Innovation Hub: Own the roadmap and execution of our SMB internal incubation program, including “Idea & Demo Days” and structured incubation cycles.
+Drive Multiple AI Initiatives: Beyond the Hub, identify, scope, and lead ad-hoc strategic AI projects (e.g., specific workflow automations, tool rollouts, or pilot programs) that require cross-functional coordination.
+Portfolio Management: Maintain a holistic view of various AI experiments and PoCs across the division to prevent silos, reduce redundancy, and ensure alignment with business goals.
+
+2. Incubation & Experimentation Architecture
+
+Structure Success: Design and refine the end-to-end incubation process (application, selection, validation, milestones) to ensure teams move effectively from loose concepts to “Demo Day-ready” PoCs.
+Focus on Impact: Collaborate with technical leaders to ensure initiatives are not just “cool tech,” but are rooted in solving genuine user problems or achieving measurable internal productivity gains.
+Advisor Orchestration: Recruit and coordinate a pool of experts (Senior Engineers, AI Specialists, PdMs) to mentor teams, providing the right technical and product guidance at the right time.
+
+3. Change Management & Cultural Transformation
+
+Community Building: Nurture a vibrant, cross-functional AI community. Move beyond simple “engagement” to creating a culture of continuous learning and experimentation.
+Best Practice Enablement: Partner with technical leads to translate complex AI capabilities into accessible playbooks, “getting started” guides, and reusable templates for engineers, PdMs, and designers.
+Event Management: Plan and execute high-impact events (Hackathons, Demo Days, Sharing Sessions) that celebrate success and inspire broad adoption.
+
+4. Operational Excellence & Continuous Improvement
+
+Measure What Matters: Define and track success metrics not just for the program (participation, completion), but for business impact (adoption rates, time saved, productivity improvements).
+Feedback Loops: Actively collect qualitative and quantitative data after every cycle or initiative. Analyze “what worked” and “what didn’t” to iterate on the program structure and the division’s overall AI strategy.
+Stakeholder Communication: Keep leadership and cross-functional partners informed on progress, resource requirements, and outcomes.
+Requirements
+
+Core Program & Change Management
+
+5+ years of experience in program management, product operations, innovation management, or technical project management.
+Change Management: Proven track record of driving adoption of new technologies or processes within a large organization. You know how to influence without direct authority.
+Strategic Agility: Ability to switch contexts between high-level strategy (roadmapping, culture building) and tactical execution (event logistics, sprint planning).
+
+Product & Technical Aptitude
+
+Product Development Context: Deep experience working closely with software development teams (Engineering, Product, Design). You understand the software lifecycle (SDLC) and how AI fits into it.
+AI Operational Fluency: You view AI through a lens of business value, not just technical novelty. While you don’t need to understand the engineering complexities of how models work (e.g., hallucinations or privacy architecture), you must be adept at consulting with our technical experts to vet feasibility. Your primary role is to bridge the gap: determining if a solution generates real ROI, validating its utility for the business, and managing the operational rollout to ensure adoption.
+
+Leadership & Soft Skills
+
+Facilitation: Excellent communication skills, capable of leading workshops, moderating panels, and articulating a clear vision to senior leadership.
+Entrepreneurial Mindset: You are self-driven and proactive. You don’t just run existing programs; you identify gaps and propose new solutions to fill them.
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Experience running internal startups, accelerators, or corporate innovation labs.
+Experience measuring productivity metrics (e.g., SPACE framework, DORA metrics) in an engineering context.
+Technical background (CS degree or coding bootcamp) is a plus, but not required if you have strong technical literacy.
+Conversational or business level Japanese.
+Compensation
+
+¥7,900,000 ~ ¥12,000,000 annually.","","","","","","","","","Apply from abroad, Program Management, Project Management","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/rapyuta-robotics/jobs/software-engineer-robotics-control-systems","/jobs/apply-from-abroad","Software Engineer - Robotics Control Systems","Rapyuta Robotics","Tokyo, Japan","2026-01-25","","","","","","",True,"","","","","Language requirements: Business English
+
+As a Robotics Control Systems team member, you will drive innovation and optimization in multi-robot controls. Your work will directly impact developing and maintaining our distributed intelligence system for ASRS and pick-assist robots. You will be responsible for designing, implementing, testing, and maintaining critical components such as:
+
+Behavior Controllers: Global and local controllers that govern decision-making for a fleet of autonomous robots.
+Path Planning Systems: Planners and executors that manage and dictate robot traffic.
+Task Allocation Strategies: Different strategies and their optimizations to ensure efficient task distribution.
+Distributed Intelligence Framework: Production-grade open-source framework (ALICA) used for coordinating multiple robots.
+Responsibilities
+
+Collaborate & Review:
+
+Perform architecture and code reviews with team members.
+Contribute to a collaborative and continuous improvement environment.
+
+Improve Processes:
+
+Identify and recommend enhancements to engineering processes.
+
+Solve Customer Challenges:
+
+Tackle challenging problems as our customer base grows.
+
+User-Focused Development:
+
+Understand user needs and ensure that the delivered solutions provide tangible value.
+Requirements
+Bachelor’s degree or higher in Computer Science, Robotics, or a related technical field.
+Strong fundamentals in algorithm design, problem-solving, and complexity analysis.
+Proficient in object-oriented programming (OOP) and multi-threading.
+Experience with C++ (C++11 or above).
+At least 3 years of corporate or research experience in Software Engineering or Robotics.
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Experience with ROS (Robot Operating System) and Python.
+Familiarity with SMACH, Behavior Tree, and RosPlan.
+Background in multiagent systems, constraint programming, or distributed systems.
+Hands-on experience with autonomous or manually operated robots.
+Knowledge of CI/CD systems.
+Startup experience.","","","","","","","","","Apply from abroad, Backend, C++, Robotics","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/rapyuta-robotics/jobs/technical-program-manager-distributed-systems","/jobs/apply-from-abroad","Technical Program Manager, Distributed Systems","Rapyuta Robotics","Tokyo, Japan","2026-01-25","","","","","","",True,"","","","","Language requirements: Business English
+
+You will drive cross-functional execution across distributed, multi-robot systems—aligning software, robotics systems, and product stakeholders to deliver reliable, high-impact features at pace. You’ll own the backlog, orchestrate planning and reviews, and create the conditions for teams to do their best work.
+
+Responsibilities
+Lead a cross-functional group of robotics systems and software engineers working on multi-robot control, coordination, and related distributed systems domains.
+Align roadmaps with product objectives by partnering daily with product managers, logistics consultants, business analysts, and operations research scientists.
+Own the group backlog: write and refine user stories, prioritize for value, and maintain crisp, testable acceptance criteria.
+Run effective cadence: planning, iteration goal-setting, reviews/demos, and retrospectives that drive measurable improvement.
+Clarify requirements and unblock execution through tight feedback loops with engineering; validate outcomes against business objectives.
+Champion continuous improvement in processes, quality, reliability, and team learning.
+Requirements
+Advanced degree in Mathematics, Operations Research, Computer Science, or equivalent practical experience.
+2+ years leading technical programs or projects in a commercial environment (software, robotics, or distributed systems).
+Demonstrated skill in backlog ownership, cross-functional facilitation, and outcome-oriented delivery.
+Proficiency in English (spoken and written).
+Ability and willingness to work from our Tokyo office; visa sponsorship available.
+Purpose-driven, with a strong connection to our mission of empowering lives with connected machines.
+Values-led; you model empathy, openness, simplicity, fearlessness, drive, and first-principles thinking in decisions and interactions.
+Calm, service-oriented leadership—steady under pressure, collaborative, and focused on elevating the team.
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Background in distributed systems, realtime coordination, or large-scale orchestration (e.g., multi-agent systems, ROS2, event-driven services).
+Experience in warehousing, logistics, or industrial automation.
+Data-informed decision-making (experiments, telemetry, reliability metrics).","","","","","","","","","Apply from abroad, Program Management, Robotics","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/rapyuta-robotics/jobs/robotics-software-engineer","/jobs/apply-from-abroad","Robotics Software Engineer - Navigation","Rapyuta Robotics","Tokyo, Japan","2026-01-25","","","","","","",True,"","","","","Language requirements: Business English
+
+We are seeking a proactive and skilled Navigation Engineer to join our robotics team, focusing on wheeled mobile platforms. This role is ideal for engineers who are passionate about autonomous navigation and eager to push the boundaries of robotic mobility. You will work closely with cross-functional teams—including perception, control, hardware, and software engineers—to design, implement, and optimize navigation systems for real-world deployment. Your ability to communicate effectively, share knowledge, and contribute to a dynamic development environment will be key to your success.
+
+Responsibilities
+Develop and maintain navigation stacks using ROS (Robot Operating System), including ROS Navigation Stack and custom solutions.
+Implement and optimize path planning algorithms such as Hybrid A* for dynamic environments.
+Containerize and manage development environments using Docker for scalable deployment.
+Collaborate with perception, localization and control teams to ensure seamless integration of navigation modules.
+Conduct simulation and real-world testing of navigation systems.
+Stay up-to-date with the latest research, tools, and trends in robotic navigation and actively propose new technologies and approaches.
+Document system architecture, design decisions, and performance evaluations.
+Requirements
+Master’s degree in Robotics, Computer Science, or a related field.
+5+ years of professional software development experience
+Solid experience with ROS and navigation stack development.
+Proficiency in path planning algorithms.
+Hands-on experience with ROS (Robot Operating System), Docker and CI/CD tools.
+Strong programming skills in C++ and Python.
+Hands-on with Linux-based development environments.
+Demonstrated ability to work independently and proactively explore new technologies.
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Experience with ROS2 and transitioning systems from ROS1 to ROS2.
+Knowledge in Perception and Computer Vision, including sensor fusion, object detection, SLAM, and AI.
+Familiarity with simulation and visualization tools.
+Experience working in agile development environments and using version control systems like Git.
+Experience with Behavior Tree","","","","","","","","","Apply from abroad, C++, Python, Robotics","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/zeals/jobs/security-engineer","/jobs/apply-from-abroad","Security Engineer","Zeals","Tokyo, Japan","2026-01-25","","","","","","",True,"","","","","Language requirements: Business English
+
+Responsibilities
+Conduct vulnerability assessments and penetration tests on systems, networks, and applications.
+Investigate, analyze, and respond to security incidents and threats in a timely manner.
+Keep abreast of the latest security trends, threat intelligence, and best practices.
+Provide guidance and support to other teams and stakeholders on security-related matters.
+Regularly review and update security measures, tools, and processes to stay ahead of evolving threats.
+Lead or support security-related projects, such as implementing new security tools or technologies.
+Analyze security metrics and trends to identify areas for improvement and adjust strategies accordingly.
+Review product designs and system architectures to identify security risks early and define appropriate security requirements using threat modeling techniques.
+Perform source code reviews to detect security flaws and potential vulnerabilities before deployment.
+Design and implement security controls and technical solutions to reduce identified risks across applications and infrastructure.
+Integrate automated security checks and testing into CI/CD pipelines to ensure consistent and scalable security practices.
+Monitor systems, logs, and alerts to identify, investigate, and respond to suspected security incidents in accordance with incident response procedures.
+Maintain and evolve security standards for web and mobile technologies to keep pace with emerging threats.
+Educate and support engineering teams through guidance, workshops, and secure coding best practices.
+Collaborate with information security personnel, auditors, and other stakeholders on technical security matters and risk assessments.
+Requirements
+At least 3-5 years of experience in information security, network security, or similar role
+Hands on experience with threat and vulnerability management
+Strong knowledge of security concepts, principles, and best practices.
+Proficiency in network and system security, including firewalls, IDS/IPS, and VPNs.
+Experience with vulnerability assessments, penetration testing, and security auditing tools.
+Familiarity with security frameworks and regulations (e.g., NIST, ISO 27001, GDPR)
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Knowledge of cloud security concepts and experience working with cloud platforms (e.g., AWS, GCP).
+Familiarity with secure coding practices and experience with application security testing tools and methodologies.
+Proficiency in one or more programming or scripting languages (e.g., Python, JavaScript, Golang) for automation and custom tool development.
+Experience leading, executing or coordinating security-related projects.
+Relevant professional certifications such as CISSP, CEH, CompTIA Security+, or GIAC.","","","","","","","","","Apply from abroad, Security","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/komoju/jobs/senior-software-engineer-fraud-risk","/jobs/apply-from-abroad","Senior Software Engineer, Fraud Risk","KOMOJU","Tokyo, Japan","2026-01-25","","","","","","",True,"","","","","Language requirements: Business English
+
+The Fraud Prevention Team at KOMOJU is our frontline defense against payment fraud, protecting both our merchants and their customers across international borders. We build and maintain the intelligent systems that analyze merchant profiles, as well as transactions in real-time to detect and prevent fraudulent activity.
+
+We value pragmatic solutions, data-driven decisions, and believe that the best fraud prevention is invisible to legitimate customers. Our stack includes Ruby, Python for ML models, OpenRouter for LLM integrations, and OpenTelemetry-based observability tools to monitor our systems 24/7.
+
+Impacts you’ll bring
+
+You will be responsible for designing, building, and maintaining software solutions for KOMOJU’s fraud prevention processes. As part of our Fraud Prevention Team, you’ll build robust antifraud solutions, create merchant-facing features that provide visibility into transaction fraud signals, and help scale our systems to handle increasing complexity and traffic. You’ll be at the intersection of engineering excellence and advanced fraud prevention, protecting billions of yen in transaction volume across borders.
+
+To be successful in this role, you must have 5+ years of software engineering experience. You should have a strong understanding of software development best practices, experience with data structures and algorithms, and strong coding skills in Ruby. In addition, being a motivated self-starter with the ability to work independently as well as in a team environment will help you thrive.
+
+Tech Stack
+Ruby on Rails
+Python, Django
+MySQL, PostgreSQL, RedShift
+React, Vue.js, Webpack, Storybook
+AWS, Terraform, Docker
+GLM, Logistic Regression
+Responsibilities
+Be a builder: contribute to the implementation of our antifraud solutions.
+Improve parts of our antifraud system to strengthen its features and make it robust.
+Develop merchant-facing risk management tools: Create intuitive dashboards that give merchants real-time visibility into fraud patterns, customizable risk rules, and actionable insights to optimize their fraud prevention strategies.
+Convert our ML models (e.g. merchant risk scorecards) into working code with engineering excellence
+We work agilely with minimal amount of meetings. With autonomy and trust, you will bring live functionalities independently that impact many merchants and shoppers.
+Requirements
+5+ years of professional experience as an engineer, currently working as a Engineer or Senior Engineer, at least 2 years of personal or professional experience with Ruby.
+Production debugging expertise: You can diagnose complex production issues, and get up to speed with an existing codebase without extensive hand-holding. You’re comfortable diving into unfamiliar code, understanding its intent, and making surgical improvements without breaking existing functionality.
+You have a strong sense of ownership, helping you move projects forward independently and make a meaningful impact.
+You have great communication skills and the ability to articulate complex technical concepts in front of different stakeholders.
+Detail-oriented team player: You catch edge cases others miss, foster positive working relationships across the team, and reliably provide coverage when teammates are unavailable.
+Business-level English proficiency.
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Familiarity with statistical methods (logistic regression, GLMs) and machine learning, ability to perform exploratory data analysis (EDA), experience with data ETL pipelines, and comfort working with SQL to analyze patterns in the data.
+Python, or any other major programming language.
+Experience working in the credit card or payment industry.
+Background in payment security or security systems in general.
+Conversational-level Japanese proficiency.","","","","","","","","","Apply from abroad, Backend, Machine Learning, Python, Ruby","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/paypay/jobs/product-designer","/jobs/apply-from-abroad","Product Designer","PayPay","Tokyo, Japan","2026-01-25","","","","","","",True,"","","","","Language requirements: Business English
+
+Join a project and work with engineers, product managers, and senior designers to develop new features and improve existing features that put user experience top priority.  Experience various challenges to deliver a new financial experience to users.
+
+Responsibilities
+Design the total UX/UI for PayPay application and app/web tools for PayPay merchants.
+UX flow and UI design based on concept
+Conduct quantitative and qualitative research and analysis using questionnaires and interviews
+Analyze and suggest improvements using numerical analysis tools
+Requirements
+More than 3-5 years of hands-on professional experience in mobile app (iOS/Android) UX/UI design.
+Experience in UX/UI design using Figma and Adobe
+Hands-on experience in product release, effectiveness measurement, and product improvement
+Business conversation level in Japanese or English
+Experience in using PayPay application
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Hands-on experience in design utilizing HCD (Human Centered Design) and design thinking
+Experience in managing in-house services
+Conversational level in both Japanese and English","","","","","","","","","Apply from abroad, Android, iOS, Product Design, UX Design","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/paypay/jobs/product-security-engineer-infrastructure","/jobs/apply-from-abroad","Product Security Engineer (Infrastructure)","PayPay","Tokyo, Japan","2026-01-25","","","","","","",True,"","","","","Language requirements: Business English
+
+The PayPay Product Security team is looking for experienced infrastructure security engineers to lead improvements to our infrastructure and operational security, and introduce key security solutions.
+
+PayPay Product Security team is responsible for driving the application security and infrastructure security changes within the product division - the part of PayPay responsible for development and operations of the PayPay app. A strong candidate for the infrastructure security engineer position will be knowledgeable about modern infrastructure solutions (such as Kubernetes, various public clouds and their services, message brokers and so on), security challenges and threats relevant to them, and have experience in one of the following areas:
+
+Leading projects to improve infrastructure security at scale (e.g. introducing role-based access control, hardening K8s configurations, introducing temporary access credentials for database access, and so on)
+Introducing and improving security orchestration and automation, as well as solution to gather, store and analyze security events and assets
+Responsibilities
+Analyzing security risks relevant to the production infrastructure
+Designing security measures for the product infrastructure environment
+Implementing and running security solutions (SIEM, vulnerability management, network security, cloud security, container security, etc.)
+Improve security incident handling within product division.
+Improving observability and monitoring for security information and events.
+Assisting infrastructure teams in prioritizing security goals
+Assisting infrastructure teams in implementing and running secure solutions
+Participating in major infrastructure projects as a security expert
+Requirements
+2+ years of infrastructure security or relevant experience
+Solid understanding of security principles, protocols, and best practices
+Solid programming skills in one or more programming languages, such as Java, Python, Golang
+Experience leading projects in any kind of security solutions, such as CNAPP, PAM, IDS/IPS, SIEM, SOAR, WAF, NGFW, etc
+Hands-on experience with cloud platforms, preferably AWS
+Hands-on Terraform experience. Experience with other IAC tools is also acceptable
+Hands-on experience with CI/CD pipelines and tools like Github Action, Jenkins, ArgoCD, etc
+Strong teamwork skills and the ability to collaborate with others in a diverse environment
+Enjoy taking up a challenge and driving it to a conclusion
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Previous experience working in DevOps, SRE, or similar roles
+Experience working with microservice-based systems
+Experience working in a security position within the fintech industry
+Native or business level Japanese proficiency","","","","","","","","","Apply from abroad, Security","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/paypay/jobs/cloud-platform-engineer-kafka-specialist","/jobs/apply-from-abroad","Cloud Platform Engineer (Kafka Specialist)","PayPay","Tokyo, Japan","2026-01-25","","","","","","",True,"","","","","Language requirements: Business English
+
+At the core of our architecture in PayPay, we use Kafka for high-performance data streaming, and every payment that goes through the app is handled by multiple topics in Kafka. To keep up with the challenges of our growing product and future expansion, we are expanding our Streaming Platform team and are looking for an engineer with deep experience in Kafka to help lead the next stage.
+
+The role involves strengthening our existing platform to bring a truly event-driven architecture to our development process, while adding performance and resilience to the existing application. A key part of our current roadmap includes migrating our self-hosted Kafka clusters to KRaft mode and operating Kafka both in self-managed form and via AWS MSK. We are looking for someone who is not only hands-on with Kafka internals, but also confident operating it at scale in production environments.
+
+This is a senior role but still very hands-on , an excellent opportunity to build and modernize the streaming infrastructure that powers payments for over 70 million users.
+
+Tech Stack
+Java, Python, Go
+Apache Kafka, Elasticsearch/Opensearch, AWS MSK, Athena, Glue
+Docker, Kubernetes, ArgoCD, Argo rollouts, Argo workflows, Artifactory, AWS, GCP
+GitHub, GitHub Actions, Jenkins, Terraform, Ansible, Microservices, GitOps
+Logstash, Fluent-bit, Vector, Victoria Metrics, Grafana, Prometheus
+Slack, Zoom, Confluence, JIRA
+Responsibilities
+Provide architecture, development, and operations ownership for Apache Kafka in production (self-hosted and AWS MSK)
+Deploy, manage and operate high-availability Kafka clusters
+Improve resilience, scalability and failure-mode readiness of Kafka infrastructure
+Monitoring and alerting of Kafka for reliability, throughput, and latency
+Perform broker tuning and partition strategy guidance with production scale in mind
+Partner with application teams to guide Kafka topic design, schema management, and best practices
+Contribute to the development of scalable, secure, and observable data pipelines
+Automate platform and operations workflows using IaC and automation tools
+Requirements
+Minimum of 2 years of engineering experience with Apache Kafka in production environments
+Minimum of 2 years of experience in AWS, Terraform, Ansible and Linux Administration
+Strong hands-on experience with Kafka cluster operations, including setup, tuning, and maintenance
+Experience with Kafka authentication and authorization operations
+Familiarity with AWS cloud platform, especially Amazon MSK (Managed Streaming for Kafka)
+* We heavily rely on AWS, so those without previous AWS experiences must expect to catch up with it after joining us
+Proficiency in one or more general-purpose programming languages (e.g., Python, Java, Go)
+Experience with infrastructure automation and configuration management tools, such as Terraform or Ansible
+Understanding of modern system design using microservice architecture
+Working knowledge of Git and CI/CD tools
+Ability to take ownership, solve problems fast and operate proactively
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Experience in running and scaling Apache Kafka both self-hosted and in managed cloud environments (e.g., AWS MSK)
+Experience migrating or operating Kafka in KRaft mode (no ZooKeeper)
+Experience in data replicate between Kafka clusters, enabling seamless data migration, disaster recovery, and cross-region data synchronization
+Exposure to Kafka security, including ACLs, TLS, SASL, and IAM-based auth on MSK
+Strong Knowledge of Kafka internals, including broker tuning, partitioning, replication, and fault tolerance
+Contributions to Kafka-related open source projects or community involvement
+Experience with Kafka Connect, Kafka Streams, or other stream processing frameworks
+Experience guiding cross-team adoption of Kafka in microservice architectures
+Experience in operating distributed systems
+Working experience in a full remote environment
+Bachelor’s or Master’s Degree in Computer Science or a related field","","","","","","","","","Apply from abroad, Java","","","","",""

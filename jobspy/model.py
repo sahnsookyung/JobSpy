@@ -151,15 +151,11 @@ class Country(Enum):
         return self.value[1], self.value[1].upper()
 
     @property
-    def glassdoor_domain_value(self):
+    def glassdoor_domain_value(self) -> str:
         if len(self.value) == 3:
             subdomain, _, domain = self.value[2].partition(":")
-            if subdomain and domain:
-                return f"{subdomain}.glassdoor.{domain}"
-            else:
-                return f"www.glassdoor.{self.value[2]}"
-        else:
-            raise Exception(f"Glassdoor is not available for {self.name}")
+            return f"{subdomain}.glassdoor.{domain}" if subdomain and domain else f"www.glassdoor.{self.value[2]}"
+        return "www.glassdoor.com"
 
     def get_glassdoor_url(self):
         return f"https://{self.glassdoor_domain_value}/"
@@ -292,7 +288,9 @@ class Site(Enum):
     GOOGLE = "google"
     BAYT = "bayt"
     NAUKRI = "naukri"
-    BDJOBS = "bdjobs"  # Add this line
+    BDJOBS = "bdjobs"
+    TOKYODEV = "tokyodev"
+    JAPANDEV = "japandev"
 
 
 class SalarySource(Enum):
