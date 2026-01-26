@@ -1,10 +1,14 @@
+# japandev.py
 from __future__ import annotations
 
 import logging
 import re
+from dataclasses import dataclass
 from datetime import date, datetime
-from typing import List
+from typing import List, Optional, Sequence
 from urllib.parse import urljoin
+
+from playwright.sync_api import sync_playwright
 
 from jobspy.model import (
     Scraper,
@@ -18,10 +22,60 @@ from jobspy.model import (
     Compensation,
     CompensationInterval,
 )
-from jobspy.scrapers.utils import create_playwright_context, setup_page, parse_proxy_string
-from playwright.sync_api import sync_playwright
+
+from jobspy.scrapers.utils import (
+    create_playwright_context,
+    setup_page,
+    parse_proxy_string,
+)
+
+try:
+    # package import
+    from .japandev_enums import (
+        FilterEnum,
+        JdApplicantLocation,
+        JdJapaneseLevel,
+        JdEnglishLevel,
+        JdRemoteWork,
+        JdSeniority,
+        JdSalary,
+        JdJobType,
+        JdOfficeLocation,
+        JdCompanyType,
+        JdSkill,
+    )
+except Exception:
+    # local script import
+    from japandev_enums import (
+        FilterEnum,
+        JdApplicantLocation,
+        JdJapaneseLevel,
+        JdEnglishLevel,
+        JdRemoteWork,
+        JdSeniority,
+        JdSalary,
+        JdJobType,
+        JdOfficeLocation,
+        JdCompanyType,
+        JdSkill,
+    )
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class _RawFilter:
+    """
+    Optional escape hatch:
+      - key + token -> will click element with id "{key}-{token}".
+    Useful if JapanDev adds new skills/options not yet in enums. You should really add the enum value though.
+    """
+    key: str
+    token: str
+
+    @property
+    def selector(self) -> str:
+        return f"[id='{self.key}-{self.token}']"
 
 
 class JapanDev(Scraper):
@@ -39,15 +93,15 @@ class JapanDev(Scraper):
         if not salary_text:
             return None
 
-        # Examples seen on JapanDev:
-        # "10M 14M yr", "8.5M 12M", sometimes includes commas or currency.
+        # Examples seen on JapanDev detail pages:
+        # "10M 14M yr", "8.5M 12M", etc.
         matches = re.findall(r"(\d+(?:\.\d+)?)", salary_text.replace(",", ""))
-        if len(matches) < 2:
+        if len(matches) < 1:
             return None
 
         try:
             min_amount = float(matches[0]) * 1_000_000
-            max_amount = float(matches[1]) * 1_000_000
+            max_amount = float(matches[1]) * 1_000_000 if len(matches) > 1 else None
             return Compensation(
                 interval=CompensationInterval.YEARLY,
                 min_amount=min_amount,
@@ -58,41 +112,39 @@ class JapanDev(Scraper):
             return None
 
     def _extract_detail_fields(self, detail_page, scraper_input: ScraperInput) -> dict:
-        # Title (job detail page)
+        # Title
         title = None
         title_el = detail_page.locator("h1.job-detail__job-name").first
         if title_el.count() > 0:
             title = title_el.inner_text().strip()
 
-        # Company name (job detail page)
+        # Company
         company_name = None
         company_el = detail_page.locator("a.job-logo__company-name").first
         if company_el.count() > 0:
             company_name = company_el.inner_text().strip()
 
-        # Location (job detail page)
+        # Location
         location_text = None
         loc_el = detail_page.locator("div.job-logo__location").first
         if loc_el.count() > 0:
             location_text = loc_el.inner_text().strip()
         else:
-            # Fallback: first item in the summary list (often "Tokyo")
             summary_first = detail_page.locator("ul.job-detail__summary-list li span").first
             if summary_first.count() > 0:
                 location_text = summary_first.inner_text().strip()
 
-        # Date posted (job detail page)
+        # Date posted
         posted = None
         summary_spans = detail_page.locator("ul.job-detail__summary-list li span").all()
         if summary_spans:
-            # Usually last span is "January 23, 2026" in your sample
             maybe_date = summary_spans[-1].inner_text().strip()
             try:
                 posted = datetime.strptime(maybe_date, "%B %d, %Y").date()
             except Exception:
                 posted = None
 
-        # Salary (job detail page): under job-detail-tag-list, find the tag with yen-icon
+        # Salary tag (yen icon)
         salary_text = None
         salary_tag = detail_page.locator(
             "div.job-detail-tag-list__basic-tag:has(img[alt='yen-icon'])"
@@ -102,17 +154,16 @@ class JapanDev(Scraper):
             if salary_desc.count() > 0:
                 salary_text = salary_desc.inner_text().strip()
 
-        # Apply link (job detail page): "APPLY NOW" button
+        # Apply link
         job_url_direct = None
         apply_el = detail_page.locator("a:has-text('APPLY NOW')").first
         if apply_el.count() > 0:
             job_url_direct = apply_el.get_attribute("href")
 
-        # Description (job detail page): main content body container
+        # Description
         description = None
         body_el = detail_page.locator("div.job-detail-main-content div.body").first
         if body_el.count() == 0:
-            # Fallback if structure changes slightly
             body_el = detail_page.locator("div.job-detail-main-content").first
 
         if body_el.count() > 0:
@@ -131,7 +182,105 @@ class JapanDev(Scraper):
             "date_posted": posted,
         }
 
-    def scrape(self, scraper_input: ScraperInput) -> JobResponse:
+    def _click_filter(self, page, option: FilterEnum | _RawFilter) -> None:
+        selector = option.selector  # both expose .selector
+        el = page.locator(selector).first
+        if el.count() == 0:
+            return
+
+        # parent <li class="filter ..."> holds selection state
+        parent = el.locator("xpath=..")
+        class_attr = parent.get_attribute("class") or ""
+        if "selected" in class_attr:
+            return
+
+        el.click()
+
+        # give the Algolia UI a moment to settle; keep it short to avoid slowing scraping
+        try:
+            page.wait_for_load_state("networkidle", timeout=2000)
+        except Exception:
+            pass
+
+    def _apply_filters(
+        self,
+        page,
+        scraper_input: ScraperInput,
+        *,
+        applicant_locations: Optional[Sequence[JdApplicantLocation]] = None,
+        japanese_levels: Optional[Sequence[JdJapaneseLevel]] = None,
+        english_levels: Optional[Sequence[JdEnglishLevel]] = None,
+        remote_work: Optional[Sequence[JdRemoteWork]] = None,
+        seniorities: Optional[Sequence[JdSeniority]] = None,
+        salary_filters: Optional[Sequence[JdSalary]] = None,
+        job_types: Optional[Sequence[JdJobType]] = None,
+        office_locations: Optional[Sequence[JdOfficeLocation]] = None,
+        company_types: Optional[Sequence[JdCompanyType]] = None,
+        skills: Optional[Sequence[JdSkill]] = None,
+        raw_filters: Optional[Sequence[_RawFilter]] = None,
+    ) -> None:
+        # Search term (Algolia search box)
+        if scraper_input.search_term:
+            try:
+                box = page.locator(".ais-SearchBox-input").first
+                if box.count() > 0:
+                    box.fill(scraper_input.search_term)
+                    box.press("Enter")
+                    try:
+                        page.wait_for_load_state("networkidle", timeout=2000)
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
+        # Apply explicit filters
+        for group in (
+            applicant_locations,
+            japanese_levels,
+            english_levels,
+            remote_work,
+            seniorities,
+            salary_filters,
+            job_types,
+            office_locations,
+            company_types,
+            skills,
+        ):
+            if not group:
+                continue
+            for opt in group:
+                self._click_filter(page, opt)
+
+        if raw_filters:
+            for rf in raw_filters:
+                self._click_filter(page, rf)
+
+        # If caller just says "remote", apply all remote-ish options (excluding "No Remote")
+        if scraper_input.is_remote and not remote_work:
+            for opt in (
+                JdRemoteWork.PARTIAL_REMOTE,
+                JdRemoteWork.FULL_REMOTE,
+                JdRemoteWork.ANYWHERE_IN_JAPAN,
+                JdRemoteWork.WORLDWIDE,
+            ):
+                self._click_filter(page, opt)
+
+    def scrape(
+        self,
+        scraper_input: ScraperInput,
+        *,
+        applicant_locations: Optional[Sequence[JdApplicantLocation]] = None,
+        japanese_levels: Optional[Sequence[JdJapaneseLevel]] = None,
+        english_levels: Optional[Sequence[JdEnglishLevel]] = None,
+        remote_work: Optional[Sequence[JdRemoteWork]] = None,
+        seniorities: Optional[Sequence[JdSeniority]] = None,
+        salary_filters: Optional[Sequence[JdSalary]] = None,
+        job_types: Optional[Sequence[JdJobType]] = None,
+        office_locations: Optional[Sequence[JdOfficeLocation]] = None,
+        company_types: Optional[Sequence[JdCompanyType]] = None,
+        skills: Optional[Sequence[JdSkill]] = None,
+        raw_filters: Optional[Sequence[_RawFilter]] = None,
+    ) -> JobResponse:
         job_list: List[JobPost] = []
 
         proxy_str = None
@@ -140,10 +289,11 @@ class JapanDev(Scraper):
                 proxy_str = self.proxies[0]
             elif isinstance(self.proxies, str):
                 proxy_str = self.proxies
+
         proxy = parse_proxy_string(proxy_str) if proxy_str else None
 
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
+            browser = p.chromium.launch(headless=False)
             context = create_playwright_context(
                 browser,
                 proxy=proxy,
@@ -153,29 +303,47 @@ class JapanDev(Scraper):
 
             page = setup_page(context, block_resources=True)
 
-            # NOTE: leaving your existing entry point; adjust if you scrape a different listing route.
-            url = f"{self.base_url}"
-            if scraper_input.search_term:
-                url += "?query=" + scraper_input.search_term
-
-            logger.info(f"Scraping JapanDev at {url}")
-
+            logger.info(f"Scraping JapanDev at {self.base_url}")
             try:
-                page.goto(url)
-                # Listing selectors vary; keep original + add a fallback used in related-job items.
-                try:
-                    page.wait_for_selector(".job-item", timeout=scraper_input.request_timeout * 1000)
-                    job_cards = page.locator(".job-item").all()
-                except Exception:
-                    page.wait_for_selector(".top-jobs__job-item", timeout=scraper_input.request_timeout * 1000)
-                    job_cards = page.locator(".top-jobs__job-item").all()
+                page.goto(self.base_url)
+                page.wait_for_selector(".filters", timeout=scraper_input.request_timeout * 1000)
             except Exception as e:
                 logger.error(f"Failed to load JapanDev listing page: {e}")
                 return JobResponse(jobs=[])
 
+            # Apply UI filters
+            self._apply_filters(
+                page,
+                scraper_input,
+                applicant_locations=applicant_locations,
+                japanese_levels=japanese_levels,
+                english_levels=english_levels,
+                remote_work=remote_work,
+                seniorities=seniorities,
+                salary_filters=salary_filters,
+                job_types=job_types,
+                office_locations=office_locations,
+                company_types=company_types,
+                skills=skills,
+                raw_filters=raw_filters,
+            )
+
+            # Get listing cards
+            job_cards = []
+            try:
+                page.wait_for_selector(".job-item, .top-jobs__job-item, .no-results", timeout=5000)
+            except Exception:
+                pass
+
+            job_cards = page.locator(".job-item").all()
+            if not job_cards:
+                job_cards = page.locator(".top-jobs__job-item").all()
+
             for card in job_cards:
+                if len(job_list) >= scraper_input.results_wanted:
+                    break
+
                 try:
-                    # Try multiple title link selectors (listing pages can differ)
                     title_el = card.locator(".job-item__title").first
                     if title_el.count() == 0:
                         title_el = card.locator("a.title.link").first
@@ -186,19 +354,30 @@ class JapanDev(Scraper):
                     job_url_relative = title_el.get_attribute("href")
                     if not job_url_relative:
                         continue
+
                     job_url = urljoin(self.base_url, job_url_relative)
 
-                    # Company name fallback from listing card (detail page will override if present)
+                    # Company name fallback (detail page overrides)
                     company_name = None
                     img_el = card.locator("img.company-logo__inner").first
                     if img_el.count() > 0:
                         company_name = img_el.get_attribute("alt")
 
-                    # Listing location/salary can be unreliable; detail page is source of truth
                     detail_page = setup_page(context, block_resources=True)
                     try:
                         detail_page.goto(job_url)
                         detail = self._extract_detail_fields(detail_page, scraper_input)
+                    except Exception as e:
+                        logger.warning(f"Failed to extract details for {job_url}: {e}")
+                        detail = {
+                            "title": title,
+                            "company_name": company_name,
+                            "location_text": "Japan",
+                            "salary_text": None,
+                            "job_url_direct": None,
+                            "description": None,
+                            "date_posted": date.today(),
+                        }
                     finally:
                         detail_page.close()
 
@@ -207,23 +386,24 @@ class JapanDev(Scraper):
                     final_location_text = detail["location_text"] or "Japan"
                     comp = self._parse_salary_to_comp(detail["salary_text"])
 
-                    # Keep simple mapping (you can improve city/state parsing later)
-                    loc = Location(country=Country.JAPAN, city=final_location_text, state=final_location_text)
-
-                    job_post = JobPost(
-                        title=final_title,
-                        company_name=final_company,
-                        job_url=job_url,
-                        job_url_direct=detail["job_url_direct"],
-                        location=loc,
-                        description=detail["description"],
-                        compensation=comp,
-                        date_posted=detail["date_posted"] or date.today(),
+                    loc = Location(
+                        country=Country.JAPAN,
+                        city=final_location_text,
+                        state=final_location_text,
                     )
-                    job_list.append(job_post)
 
-                    if len(job_list) >= scraper_input.results_wanted:
-                        break
+                    job_list.append(
+                        JobPost(
+                            title=final_title,
+                            company_name=final_company,
+                            job_url=job_url,
+                            job_url_direct=detail["job_url_direct"],
+                            location=loc,
+                            description=detail["description"],
+                            compensation=comp,
+                            date_posted=detail["date_posted"] or date.today(),
+                        )
+                    )
 
                 except Exception as e:
                     logger.warning(f"Error parsing job card: {e}")
