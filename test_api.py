@@ -7,23 +7,23 @@ import requests
 import json
 import time
 
-
 API_URL = "http://localhost:8000"
 
-
-def submit_job(site_name, search_term=None, location=None, results_wanted=3, options=None):
+def submit_job(site_type, search_term=None, location=None, results_wanted=3, options=None, **kwargs):
     """Submit a scraping job and return the task ID."""
+    # Construct payload matching ScraperInput structure
     payload = {
-        "site_name": site_name,
+        "site_type": site_type,
         "search_term": search_term,
         "location": location,
         "results_wanted": results_wanted,
         "is_remote": False,
-        "options": options or {}
+        "options": options or {},
+        **kwargs # Pass other top-level fields like hours_old
     }
     
     print(f"\n{'='*60}")
-    print(f"Testing {site_name.upper()}")
+    print(f"Testing {site_type}")
     print(f"{'='*60}")
     print(f"Request: {json.dumps(payload, indent=2)}")
     
@@ -36,8 +36,11 @@ def submit_job(site_name, search_term=None, location=None, results_wanted=3, opt
         return result['task_id']
     except Exception as e:
         print(f"✗ Failed to submit job: {e}")
+        try:
+             print(f"Response content: {response.text}")
+        except:
+             pass
         return None
-
 
 def check_status(task_id, max_wait=120):
     """Check job status and wait for completion."""
@@ -48,14 +51,25 @@ def check_status(task_id, max_wait=120):
     while time.time() - start_time < max_wait:
         try:
             response = requests.get(f"{API_URL}/status/{task_id}", timeout=10)
-            print(f"Response Code: {response.status_code}")
             response.raise_for_status()
             result = response.json()
             
             status = result.get('status')
             if status == 'completed':
                 count = result.get('count', 0)
+                data = result.get('data', [])
                 print(f"✓ Completed: Found {count} jobs")
+                
+                # Show head of results (first 2 jobs)
+                if data:
+                    print("-" * 20)
+                    print("HEAD OF RESULTS (First 3 jobs):")
+                    for i, job in enumerate(data[:3]):
+                        print(f"[{i+1}] {job.get('title')} @ {job.get('company_name')}")
+                        print(f"    Location: {job.get('location')}")
+                        print(f"    URL: {job.get('job_url')}")
+                    print("-" * 20)
+                
                 return result
             elif status == 'failed':
                 error = result.get('error', 'Unknown error')
@@ -71,13 +85,12 @@ def check_status(task_id, max_wait=120):
     print(f"✗ Timeout after {max_wait}s")
     return None
 
-
 def test_scrapers():
     """Test multiple scrapers."""
     
     tests = [
         {
-            "site_name": "tokyodev",
+            "site_type": ["tokyodev"],
             "search_term": "python",
             "results_wanted": 3,
             "options": {
@@ -86,33 +99,39 @@ def test_scrapers():
             }
         },
         {
-            "site_name": "japandev",
+            "site_type": ["japandev"],
             "search_term": "",
             "results_wanted": 3,
             "options": {
                 "japanese_levels": ["japanese_level_not_required"],
-                "seniorities": ["seniority_level_mid_level"]
+                "seniorities": ["seniority_level_junior", "seniority_level_mid_level"],
+                "applicant_locations": ["candidate_location_anywhere"]
             }
         },
         {
-            "site_name": "indeed",
+            "site_type": ["indeed"],
             "search_term": "software engineer",
-            "location": "San Francisco",
+            "location": "Tokyo",
+            "country": "Japan",
             "results_wanted": 3,
+            "hours_old": 24*7,
             "options": {}
         },
         {
-            "site_name": "linkedin",
-            "search_term": "data scientist",
-            "location": "San Francisco",
+            "site_type": ["linkedin"],
+            "search_term": "software engineer",
+            "location": "Tokyo",
             "results_wanted": 3,
+            "hours_old": 168,
+            "linkedin_fetch_description": True,
             "options": {}
         },
         {
-            "site_name": "glassdoor",
-            "search_term": "backend engineer",
-            "location": "New York",
+            "site_type": ["glassdoor"],
+            "search_term": "software engineer",
+            "location": "Tokyo",
             "results_wanted": 3,
+            "hours_old": 168,
             "options": {}
         }
     ]
@@ -123,11 +142,11 @@ def test_scrapers():
         if task_id:
             result = check_status(task_id, max_wait=180)
             results.append({
-                "site": test["site_name"],
+                "site": str(test["site_type"]),
                 "task_id": task_id,
                 "result": result
             })
-        time.sleep(2)  # Brief pause between tests
+        time.sleep(2)
     
     # Summary
     print(f"\n{'='*60}")
@@ -136,8 +155,7 @@ def test_scrapers():
     for r in results:
         status = r['result'].get('status', 'unknown') if r['result'] else 'no result'
         count = r['result'].get('count', 0) if r['result'] else 0
-        print(f"{r['site']:15} - {status:15} ({count} jobs)")
-
+        print(f"{r['site']:30} - {status:15} ({count} jobs)")
 
 if __name__ == "__main__":
     print("Starting API tests...")

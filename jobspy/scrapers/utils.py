@@ -46,7 +46,7 @@ def create_playwright_context(
     # 3. Configure Context Arguments
     context_args = {
         "user_agent": final_ua,
-        "viewport": {"width": 1366, "height": 768},
+        "viewport": {"width": 1600, "height": 900},
         "locale": "en-US",
         "timezone_id": "America/New_York",
         "color_scheme": "dark", # Matches sec-ch-prefers-color-scheme
