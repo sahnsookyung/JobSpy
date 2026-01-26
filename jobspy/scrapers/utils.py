@@ -46,10 +46,10 @@ def create_playwright_context(
     # 3. Configure Context Arguments
     context_args = {
         "user_agent": final_ua,
-        "viewport": {"width": 1600, "height": 900},
+        "viewport": {"width": 1920, "height": 1080},
         "locale": "en-US",
         "timezone_id": "America/New_York",
-        "color_scheme": "dark", # Matches sec-ch-prefers-color-scheme
+        "color_scheme": "light", # Matches sec-ch-prefers-color-scheme
         
         # EXPERIMENTAL: Try to set client hints via permissions/args if possible, 
         # but Playwright doesn't have a direct "sec_ch_ua" arg in new_context.

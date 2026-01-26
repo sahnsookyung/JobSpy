@@ -132,6 +132,7 @@ def test_scrapers():
             "location": "Tokyo",
             "results_wanted": 3,
             "hours_old": 168,
+            "request_timeout": 60*5, # 5 mins
             "options": {}
         }
     ]

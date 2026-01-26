@@ -1,4 +1,91 @@
 "id","site","job_url","job_url_direct","title","company","location","date_posted","job_type","salary_source","interval","min_amount","max_amount","currency","is_remote","job_level","job_function","listing_type","emails","description","company_industry","company_url","company_logo","company_url_direct","company_addresses","company_num_employees","company_revenue","company_description","skills","experience_range","company_rating","company_reviews_count","vacancy_count","work_from_home_type"
+"in-9587f653dd1a1fc5","indeed","https://jp.indeed.com/viewjob?jk=9587f653dd1a1fc5","https://kyndryl.wd5.myworkdayjobs.com/en-US/KyndrylProfessionalCareers/job/Tokyo-KJP51658-Roppongi-Hills/Agentic-AI---Software-Engineer_R-52690-1","Agentic AI - Software Engineer","Kyndryl","六本木駅, JPC, JP","2026-01-27","","","","","","",False,"","","","","**Who We Are**
+
+At Kyndryl, we run and reimagine the mission-critical technology systems that drive advantage for the world’s leading businesses. We are at the heart of progress; with proven expertise and a continuous flow of AI-powered insight, enabling smarter decisions, faster innovation, and a lasting competitive edge. For our people—Kyndryls—that means doing purposeful work that powers human progress. Join us and experience a flexible, supportive environment where your well-being is prioritized and your potential can thrive.
+
+**The Role**
+
+As an Agentic AI Software Engineer at Kyndryl, you’ll take the architect’s vision and turn it into reality building and delivering the code and integrations that power our customer engagements, and next-gen Agentic AI deployments. This is a hands-on, highly technical role where you’ll work on enterprise-grade software platforms that integrate Agentic AI capabilities.
+  
+  
+You’ll thrive in a true builder’s environment, where MVP rollouts happen in weeks, and you’ll have the autonomy to experiment, innovate, and solve complex problems. Expect a mix of technical work, some customer-facing collaboration and a fast-paced, iterative setting with evolving requirements.
+  
+  
+What You’ll Do
+  
+
+* Implementation of agents using LLM frameworks such as LangChain, LlamaIndex, or custom-built solutions
+
+* Design and control of agent behaviors, including tool calling and function execution
+
+* Development of multi-step and multi-agent workflows through agent decomposition and orchestration
+
+* Implementation and operation of model performance improvements via fine-tuning and adapters (e.g., LoRA)
+
+* Design, version control, and evaluation pipelines for prompt engineering
+
+* Implementation of secure sandbox environments and execution infrastructures to enable safe tool execution
+
+Your Future at Kyndryl
+  
+Every position at Kyndryl offers a way forward to grow your career. We have
+  
+opportunities that you won’t find anywhere else, including hands-on experience, learning opportunities, and the chance to certify in all four major platforms. Whether
+  
+you want to broaden your knowledge base or narrow your scope and specialise in a specific sector, you can find your opportunity here.
+
+**Who You Are**
+
+You’re good at what you do and possess the required experience to prove it. However, equally as important, you have a growth mindset; you are keen to drive your own personal and professional development. You are customer-focused – someone who prioritises customer success in their work. And finally, you’re open and borderless – naturally inclusive in how you work with others.
+  
+  
+Essential Qualifications
+
+* Native Japanese proficiency or equivalent
+* Python software development experience (approximately 3+ years)
+* Basic understanding of asynchronous processing, API design, and distributed systems
+* Development and operations experience in cloud-native environments
+* Experience implementing systems using LLMs or AI (professional or research)
+
+Preferred Skills
+  
+
+* Experience implementing agents using frameworks such as LangChain or LlamaIndex
+* Experience developing LLM applications that include tool calling and function execution
+* Experience operating prompt design, evaluation, and improvement loops
+* Experience implementing or operating fine-tuning, LoRA, or other adapter techniques
+* Experience designing secure execution environments or sandboxes
+
+Why Join Us
+  
+
+* Work on the next frontier: Agentic AI is new and transformative, be part of defining its enterprise adoption.
+* Startup energy and enterprise scale: agile innovation backed by global resources.
+* Direct impact: Your code will power Kyndryl’s AI-native transformation.
+
+  
+#AgenticAI
+
+**Being You**
+
+The “Kyn” in Kyndryl means kinship, which represents the strong bonds we have with each other, our customers and our communities. We focus on ensuring all Kyndryls feel included and we welcome people of all cultures, backgrounds, and experiences. Even if you don’t meet every requirement, we encourage you to apply. We believe in growth, and we’re excited to see what you can bring. At Kyndryl, employee feedback has told us that our number one driver of employee engagement is belonging. That sense of belonging — being a valued, respected, trusted member of the team — is fundamental to our culture and fueling great experiences for our customers. This dedication to welcoming everyone into our company means that Kyndryl gives you the ability to thrive and contribute to our culture of empathy and shared success. That’s The Kyndryl Way.
+
+**What You Can Expect**
+
+Your career with us isn’t just a job—it’s an adventure with purpose. We offer a dynamic, hybrid-friendly culture that supports your well-being and empowers you to grow. Our Be Well programs are thoughtfully designed to support your financial, mental, physical, and social health—because we know that when you feel your best, you do your best.
+  
+  
+From your very first day, you’ll dive into impactful work that powers the systems our customers rely on every day. You won’t just contribute—you’ll make a difference, tackling meaningful projects that sharpen your skills and fuel your growth.
+  
+  
+We’re here to champion your journey. With powerful tools to chart your career path, personalized development goals aligned with your ambitions, and continuous feedback to keep you inspired and on track, you’ll have everything you need to thrive and evolve. You’ll develop in-demand skills to grow your career and achieve your ambitions with access to cutting-edge learning opportunities—from certifications with Microsoft, Google, and Amazon to coaching and hands-on experiences. And through it all, you’ll be part of a culture that values empathy, restless learning, and a devotion to shared success.
+  
+  
+We want you to thrive here—and we’re committed to helping you do just that. Ready to make an impact? Join us and help shape what’s next.
+
+**Get Referred!**
+
+If you know someone that works at Kyndryl, when asked ‘How Did You Hear About Us’ during the application process, select ‘Employee Referral’ and enter your contact's Kyndryl email address.","","https://jp.indeed.com/cmp/Kyndryl","https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/0fa041766388e801af9df38db401e16a","http://kyndryl.com/careers","","10,000+","Decline to state","We design, build, manage and modernize the mission-critical technology systems that the world depends on every day.","","","","","",""
 "in-fb4442668ab74644","indeed","https://jp.indeed.com/viewjob?jk=fb4442668ab74644","https://apply.workable.com/degica-hiring/j/6E3C340851/","Backend Engineer, Ruby","株式会社DEGICA","JPC, JP","2026-01-26","","","","","","",True,"","","","","About KOMOJU
   
   
@@ -2515,71 +2602,3 @@ Are you ready for an exciting new challenge? Does the above description sound li
 
 **This is solely for job seekers with disabilities requiring accessibility assistance or an accommodation in the job application process. Messages left for other purposes will not receive a response.**
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------","","https://jp.indeed.com/cmp/Hitachi-Energy","https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/4b56466eaeb09fa805f77bbc3feb8759","http://www.hitachienergy.com","Zürich","10,000+","more than $10B (USD)","Advancing a sustainable energy future for all","","","","","",""
-"in-e497685b2ee29991","indeed","https://jp.indeed.com/viewjob?jk=e497685b2ee29991","https://progres11.jposting.net/pgbmw/u/job.phtml?job_code=611","Senior Specialist, DevOps, Application Maintenance (FG-AP-51)","ビー・エム・ダブリュー・ジャパン・ファイナンス株式会社","丸の内, JPC, JP","2026-01-21","","","","","","",False,"","","","","We are seeking a highly skilled Application Maintenance Specialist to join our DevOps team, responsible for managing and maintaining the operational stability of our financial applications. This role requires close collaboration with our offshore development team in India to ensure smooth deployment, continuous monitoring, and proactive maintenance of critical financial systems. The ideal candidate will have a solid foundation in application support, DevOps practices, and financial domain knowledge to drive system reliability and performance.
-  
-  
-- Manage day-to-day application operations for financial systems, ensuring high availability, optimal performance, and adherence to security standards.
-  
-  
-- Collaborate effectively with the offshore development team in India to provide technical support and resolve application issues throughout the software lifecycle.
-  
-  
-- Assist in the implementation and maintenance of CI/CD pipelines, supporting automation of deployments and environment consistency.
-  
-  
-- Monitor application health using modern monitoring and alerting tools; diagnose and troubleshoot incidents to ensure minimal downtime.
-  
-  
-- Maintain comprehensive documentation of system configurations, operational procedures, and incident resolutions.
-  
-  
-- Work closely with cross-functional teams, including development, and business stakeholders to understand requirements and support application enhancements.
-  
-  
-- Conduct regular system audits, performance tuning, and preventive maintenance to optimize application stability and responsiveness.
-  
-  
-- Stay current with evolving DevOps methodologies, financial industry regulations, and technology trends to recommend improvements.
-
-  
-
-登録資格  
-Job qualification
-
-- Bachelor’s degree in computer science, Information Technology, or a related field.
-  
-  
-- Proven experience in application maintenance, support, or DevOps roles, ideally within financial services or related industries.
-  
-  
-- Strong understanding of financial systems, including relevant regulatory and compliance requirements.
-  
-  
-- Practical experience with cloud platforms such as AWS or Azure and container orchestration tools like Docker and Kubernetes.
-  
-  
-- Proficiency in scripting languages (Python, Bash, or similar) and automation/configuration management tools (Ansible, Terraform, etc.).
-  
-  
-- Familiarity with monitoring, logging, and incident management tools (e.g., Splunk, Grafana, ELK Stack).
-  
-  
-- Excellent analytical and problem-solving skills, with the ability to manage and resolve urgent issues under pressure.
-  
-  
-- Strong communication skills and proven experience collaborating with offshore teams in a virtual environment.
-  
-  
-- Relevant industry certifications are a plus (e.g., AWS Certified DevOps Engineer, Azure DevOps Solutions Expert, ITIL).
-  
-  
-- Ability to document clearly and maintain operational knowledge bases and runbooks.
-
-  
-
-勤務地  
-Location
-
-Tokyo HQ (Shiodome)
-  
-東京本社（汐留）","","https://jp.indeed.com/cmp/%E3%83%93%E3%83%BC%E3%83%BB%E3%82%A8%E3%83%A0%E3%83%BB%E3%83%80%E3%83%96%E3%83%AA%E3%83%A5%E3%83%BC%E3%83%BB%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3%E3%83%BB%E3%83%95%E3%82%A1%E3%82%A4%E3%83%8A%E3%83%B3%E3%82%B9%E6%A0%AA%E5%BC%8F%E4%BC%9A%E7%A4%BE","https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/ba216fc18c89f172177f64034959ca9c","https://www.bmw.co.jp/ja/topics/service-and-accessory/financial-services/company.html","","","","","","","","","",""
