@@ -225,6 +225,7 @@ class TokyoDev(Scraper):
         - salary line containing ¥
         - japanese/english requirement strings (text contains 'Japanese'/'English')
         - remote boolean (header contains 'remote')
+        - date_posted (from button with tooltip)
         """
         header = detail_page.locator("#job-header")
         out: dict = {
@@ -233,16 +234,17 @@ class TokyoDev(Scraper):
             "japanese_req_text": None,
             "english_req_text": None,
             "is_remote": None,
+            "date_posted": None,  # Add this field
         }
-
-        # Company: link to /companies/... contains <span class="font-bold">Company</span>.
+        
+        # Company: link to /companies/... contains Company.
         try:
             out["company_name"] = (
                 header.locator("a[href^='/companies/'] span.font-bold").first.inner_text().strip()
             )
         except Exception:
             pass
-
+        
         # Salary: find a span containing "¥" within the header.
         try:
             salary_candidates = header.locator("xpath=.//span[contains(., '¥')]").all_inner_texts()
@@ -254,7 +256,7 @@ class TokyoDev(Scraper):
                     break
         except Exception:
             pass
-
+        
         # Language requirements: tooltip spans show "Business Japanese" etc.
         try:
             tooltip_texts = header.locator("[data-controller='tooltip']").all_inner_texts()
@@ -266,14 +268,45 @@ class TokyoDev(Scraper):
                     out["english_req_text"] = t2
         except Exception:
             pass
-
+        
         # Remote: keyword check in header text (e.g., "Fully remote ...").
         try:
             out["is_remote"] = "remote" in header.inner_text().lower()
         except Exception:
             pass
-
+        
+        # Date Posted: Extract from button with tooltip containing "Verified as active"
+        try:
+            # Find button with data-controller="tooltip" that contains date text
+            date_button = header.locator("button[data-controller='tooltip']").first
+            if date_button.count() > 0:
+                # Get the tooltip attribute which contains the verification info
+                tooltip_content = date_button.get_attribute("data-tooltip-content-value")
+                
+                # Extract date from tooltip "Verified as active January  8 2026"
+                if tooltip_content and "Verified as active" in tooltip_content:
+                    # Extract the date after "Verified as active"
+                    match = re.search(r"Verified as active\s+(.+?)\.?$", tooltip_content)
+                    if match:
+                        date_str = match.group(1).strip()
+                    else:
+                        # Fallback: use button text
+                        date_str = date_button.inner_text().strip()
+                    
+                    # Parse date string "January  8 2026" (note: double space handling)
+                    # Normalize multiple spaces to single space
+                    date_str = " ".join(date_str.split())
+                    
+                    # Parse the date
+                    from datetime import datetime
+                    parsed_date = datetime.strptime(date_str, "%B %d %Y").date()
+                    out["date_posted"] = parsed_date
+        except Exception as e:
+            # If extraction fails, fallback to None (will use date.today() later)
+            pass
+        
         return out
+
 
     def scrape(
         self,
@@ -395,7 +428,7 @@ class TokyoDev(Scraper):
                         location=Location(country=Country.JAPAN, city="Tokyo"),
                         description=description,
                         is_remote=is_remote,
-                        date_posted=date.today(),
+                        date_posted=header_info.get("date_posted") or date.today(),
                         job_type=[],
                         compensation=compensation,
                         skills=seed.skills,

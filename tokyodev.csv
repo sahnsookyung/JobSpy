@@ -1,4 +1,45 @@
 "id","site","job_url","job_url_direct","title","company","location","date_posted","job_type","salary_source","interval","min_amount","max_amount","currency","is_remote","job_level","job_function","listing_type","emails","description","company_industry","company_url","company_logo","company_url_direct","company_addresses","company_num_employees","company_revenue","company_description","skills","experience_range","company_rating","company_reviews_count","vacancy_count","work_from_home_type"
+"","tokyodev","https://www.tokyodev.com/companies/komoju/jobs/senior-software-engineer-fraud-risk","/jobs/apply-from-abroad","Senior Software Engineer, Fraud Risk","KOMOJU","Tokyo, Japan","2026-01-26","","","","","","",True,"","","","","Language requirements: Business English
+
+The Fraud Prevention Team at KOMOJU is our frontline defense against payment fraud, protecting both our merchants and their customers across international borders. We build and maintain the intelligent systems that analyze merchant profiles, as well as transactions in real-time to detect and prevent fraudulent activity.
+
+We value pragmatic solutions, data-driven decisions, and believe that the best fraud prevention is invisible to legitimate customers. Our stack includes Ruby, Python for ML models, OpenRouter for LLM integrations, and OpenTelemetry-based observability tools to monitor our systems 24/7.
+
+Impacts you’ll bring
+
+You will be responsible for designing, building, and maintaining software solutions for KOMOJU’s fraud prevention processes. As part of our Fraud Prevention Team, you’ll build robust antifraud solutions, create merchant-facing features that provide visibility into transaction fraud signals, and help scale our systems to handle increasing complexity and traffic. You’ll be at the intersection of engineering excellence and advanced fraud prevention, protecting billions of yen in transaction volume across borders.
+
+To be successful in this role, you must have 5+ years of software engineering experience. You should have a strong understanding of software development best practices, experience with data structures and algorithms, and strong coding skills in Ruby. In addition, being a motivated self-starter with the ability to work independently as well as in a team environment will help you thrive.
+
+Tech Stack
+Ruby on Rails
+Python, Django
+MySQL, PostgreSQL, RedShift
+React, Vue.js, Webpack, Storybook
+AWS, Terraform, Docker
+GLM, Logistic Regression
+Responsibilities
+Be a builder: contribute to the implementation of our antifraud solutions.
+Improve parts of our antifraud system to strengthen its features and make it robust.
+Develop merchant-facing risk management tools: Create intuitive dashboards that give merchants real-time visibility into fraud patterns, customizable risk rules, and actionable insights to optimize their fraud prevention strategies.
+Convert our ML models (e.g. merchant risk scorecards) into working code with engineering excellence
+We work agilely with minimal amount of meetings. With autonomy and trust, you will bring live functionalities independently that impact many merchants and shoppers.
+Requirements
+5+ years of professional experience as an engineer, currently working as a Engineer or Senior Engineer, at least 2 years of personal or professional experience with Ruby.
+Production debugging expertise: You can diagnose complex production issues, and get up to speed with an existing codebase without extensive hand-holding. You’re comfortable diving into unfamiliar code, understanding its intent, and making surgical improvements without breaking existing functionality.
+You have a strong sense of ownership, helping you move projects forward independently and make a meaningful impact.
+You have great communication skills and the ability to articulate complex technical concepts in front of different stakeholders.
+Detail-oriented team player: You catch edge cases others miss, foster positive working relationships across the team, and reliably provide coverage when teammates are unavailable.
+Business-level English proficiency.
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Familiarity with statistical methods (logistic regression, GLMs) and machine learning, ability to perform exploratory data analysis (EDA), experience with data ETL pipelines, and comfort working with SQL to analyze patterns in the data.
+Python, or any other major programming language.
+Experience working in the credit card or payment industry.
+Background in payment security or security systems in general.
+Conversational-level Japanese proficiency.","","","","","","","","","Apply from abroad, Backend, Machine Learning, Python, Ruby","","","","",""
 "","tokyodev","https://www.tokyodev.com/companies/moneyforward/jobs/security-specialist-product-security-ciso-office-tokyo","/jobs/apply-from-abroad","Security Specialist (Product Security), CISO Office, Tokyo","Money Forward","Tokyo, Japan","2026-01-26","","direct_data","yearly",8000000.0,17000000.0,"JPY",True,"","","","","Language requirements: Business English
 
 At Money Forward, we develop a wide range of popular services, including our automated personal financial management tool “Money Forward ME” and the “Money Forward Cloud” suite for businesses. Our ecosystem is powered by advanced technologies such as “Account Aggregation” and our single sign-on system, “Money Forward ID.”
@@ -250,47 +291,6 @@ Familiarity with secure coding practices and experience with application securit
 Proficiency in one or more programming or scripting languages (e.g., Python, JavaScript, Golang) for automation and custom tool development.
 Experience leading, executing or coordinating security-related projects.
 Relevant professional certifications such as CISSP, CEH, CompTIA Security+, or GIAC.","","","","","","","","","Apply from abroad, Security","","","","",""
-"","tokyodev","https://www.tokyodev.com/companies/komoju/jobs/senior-software-engineer-fraud-risk","/jobs/apply-from-abroad","Senior Software Engineer, Fraud Risk","KOMOJU","Tokyo, Japan","2026-01-26","","","","","","",True,"","","","","Language requirements: Business English
-
-The Fraud Prevention Team at KOMOJU is our frontline defense against payment fraud, protecting both our merchants and their customers across international borders. We build and maintain the intelligent systems that analyze merchant profiles, as well as transactions in real-time to detect and prevent fraudulent activity.
-
-We value pragmatic solutions, data-driven decisions, and believe that the best fraud prevention is invisible to legitimate customers. Our stack includes Ruby, Python for ML models, OpenRouter for LLM integrations, and OpenTelemetry-based observability tools to monitor our systems 24/7.
-
-Impacts you’ll bring
-
-You will be responsible for designing, building, and maintaining software solutions for KOMOJU’s fraud prevention processes. As part of our Fraud Prevention Team, you’ll build robust antifraud solutions, create merchant-facing features that provide visibility into transaction fraud signals, and help scale our systems to handle increasing complexity and traffic. You’ll be at the intersection of engineering excellence and advanced fraud prevention, protecting billions of yen in transaction volume across borders.
-
-To be successful in this role, you must have 5+ years of software engineering experience. You should have a strong understanding of software development best practices, experience with data structures and algorithms, and strong coding skills in Ruby. In addition, being a motivated self-starter with the ability to work independently as well as in a team environment will help you thrive.
-
-Tech Stack
-Ruby on Rails
-Python, Django
-MySQL, PostgreSQL, RedShift
-React, Vue.js, Webpack, Storybook
-AWS, Terraform, Docker
-GLM, Logistic Regression
-Responsibilities
-Be a builder: contribute to the implementation of our antifraud solutions.
-Improve parts of our antifraud system to strengthen its features and make it robust.
-Develop merchant-facing risk management tools: Create intuitive dashboards that give merchants real-time visibility into fraud patterns, customizable risk rules, and actionable insights to optimize their fraud prevention strategies.
-Convert our ML models (e.g. merchant risk scorecards) into working code with engineering excellence
-We work agilely with minimal amount of meetings. With autonomy and trust, you will bring live functionalities independently that impact many merchants and shoppers.
-Requirements
-5+ years of professional experience as an engineer, currently working as a Engineer or Senior Engineer, at least 2 years of personal or professional experience with Ruby.
-Production debugging expertise: You can diagnose complex production issues, and get up to speed with an existing codebase without extensive hand-holding. You’re comfortable diving into unfamiliar code, understanding its intent, and making surgical improvements without breaking existing functionality.
-You have a strong sense of ownership, helping you move projects forward independently and make a meaningful impact.
-You have great communication skills and the ability to articulate complex technical concepts in front of different stakeholders.
-Detail-oriented team player: You catch edge cases others miss, foster positive working relationships across the team, and reliably provide coverage when teammates are unavailable.
-Business-level English proficiency.
-Nice to haves
-
-While not specifically required, tell us if you have any of the following.
-
-Familiarity with statistical methods (logistic regression, GLMs) and machine learning, ability to perform exploratory data analysis (EDA), experience with data ETL pipelines, and comfort working with SQL to analyze patterns in the data.
-Python, or any other major programming language.
-Experience working in the credit card or payment industry.
-Background in payment security or security systems in general.
-Conversational-level Japanese proficiency.","","","","","","","","","Apply from abroad, Backend, Machine Learning, Python, Ruby","","","","",""
 "","tokyodev","https://www.tokyodev.com/companies/paypay/jobs/product-designer","/jobs/apply-from-abroad","Product Designer","PayPay","Tokyo, Japan","2026-01-26","","","","","","",True,"","","","","Language requirements: Business English
 
 Join a project and work with engineers, product managers, and senior designers to develop new features and improve existing features that put user experience top priority.  Experience various challenges to deliver a new financial experience to users.
@@ -399,7 +399,7 @@ Experience guiding cross-team adoption of Kafka in microservice architectures
 Experience in operating distributed systems
 Working experience in a full remote environment
 Bachelor’s or Master’s Degree in Computer Science or a related field","","","","","","","","","Apply from abroad, Java","","","","",""
-"","tokyodev","https://www.tokyodev.com/companies/paypay/jobs/automation-qa-engineer","/c/paypay/j/automation-qa-engineer/applications/new","Automation QA Engineer","PayPay","Tokyo, Japan","2026-01-26","","","","","","",True,"","","","","Language requirements: Business English
+"","tokyodev","https://www.tokyodev.com/companies/paypay/jobs/automation-qa-engineer","/jobs/apply-from-abroad","Automation QA Engineer","PayPay","Tokyo, Japan","2026-01-26","","","","","","",True,"","","","","Language requirements: Business English
 
 Team Missions
 
@@ -483,89 +483,6 @@ Portfolio of past projects.
 Compensation
 
 ¥6,000,000 ~ annually.","","","","","","","","","Apply from abroad, Android, Flutter, iOS","","","","",""
-"","tokyodev","https://www.tokyodev.com/companies/slacker-apps/jobs/ai-chatbot-engineer","/c/slacker-apps/j/ai-chatbot-engineer/applications/new","AI Chatbot Engineer","Slacker Apps","Tokyo, Japan","2026-01-26","","direct_data","yearly",5000000.0,8000000.0,"JPY",True,"","","","","Language requirements: Business English
-
-We’re looking for an engineer to take ownership of our AI orchestration layer for real-time AI character interaction products used in conversational attractions and live experiences. You’ll evolve the foundations built by our partner and bring the system fully in-house — focusing on latency, reliability, multi-routine orchestration, guardrails, and real-time character interaction.
-
-This is a lead-level role for someone excited to own Slacker Apps’ AI systems, stay close to the latest advancements in the AI space, and work hands-on with our team to turn cutting-edge technology into AAA-quality products for world-known clients.
-
-Responsibilities
-Maintain and expand our LLM-based orchestration layer (routing, routines, memory, intent handling).
-Design robust conversation flows with guardrails suitable for public-facing attractions.
-Integrate STT, TTS, RAG, and animation triggers for real-time character interactions.
-Work closely with Unity developers, designers, and animators to deliver low-latency, expressive character experiences.
-Optimise systems for both on-prem and off-prem GPU deployment (4090/5090 boxes, RunPod-style orchestration).
-Evaluate new models, tools, and approach
-Requirements
-2+ years professional development experience required
-Strong backend engineering experience in Python or Node.js.
-Hands-on experience integrating LLMs (OpenAI, Anthropic, fine-tuned models, vector databases).
-Experience building real-time or low-latency systems.
-Solid understanding of GPU-based inference and local/remote deployment strategies.
-Ability to design systems that are stable, observable, and maintainable in production environments.
-Nice to haves
-
-While not specifically required, tell us if you have any of the following.
-
-Experience leading or owning AI systems in production.
-Familiarity with real-time audio pipelines (STT/TTS streaming).
-Experience with character-driven or conversational UX (games, virtual humans, chatbots, assistants).
-Knowledge of prompt engineering, fine-tuning workflows, or evaluation tooling.
-Experience with containerisation, orchestration, or scalable inference infrastructure.
-Interest in AI safety, guardrails, and content moderation for public-facing products.
-Curiosity and enthusiasm for staying up to date with the rapidly evolving AI landscape.
-Compensation
-
-¥5,000,000 ~ ¥8,000,000 annually.","","","","","","","","","Apply from abroad, Machine Learning, Python","","","","",""
-"","tokyodev","https://www.tokyodev.com/companies/hennge/jobs/junior-software-engineer-go-web-dev","/jobs/apply-from-abroad","Software Engineer (Go / Web Dev)","HENNGE","Tokyo, Japan","2026-01-26","","direct_data","yearly",7000000.0,9000000.0,"JPY",True,"","","","","Language requirements: Business English
-
-We’re looking for a software engineer to take ownership of backend and web-platform development. You’ll join the File DLP Team, building and maintaining the File DLP product within the HENNGE One suite.
-
-As one of the newer products in our lineup, File DLP is still evolving — you’ll work closely with us to explore new ideas, shape features from discovery to delivery, and bring impactful solutions to our customers. As the product continues to grow rapidly, you’ll also tackle scalability challenges and be expected to develop creative, forward-looking solutions to ensure reliability and performance at scale.
-
-While your main focus will be backend development, the team values full-stack and cross-functional collaboration — giving you opportunities to explore the frontend and work closely with stakeholders to deepen your understanding of the business and how our product creates value for customers.
-
-Tech Stack: Golang, React, Graphql, PostgreSQL, Terraform, Temporal, AWS
-
-Responsibilities
-Design, build, and maintain new features for HENNGE One, using Go and other web technologies.
-Automate deployment, testing, monitoring and documentation via CI/CD pipelines and infrastructure-as-code.
-Participate actively in product discovery processes that involve Product Management, Design, and Customer Success teams to deliver high-quality user experiences.
-Participate actively in code reviews, discussions and technical decision-making.
-Assess risks in system architecture designs.
-Work collaboratively with other engineers in a team environment, and contribute to improving team process & engineering culture.
-Requirements
-2+ years of experience developing production-scale web applications using Go.
-Experience in developing full-stack applications.
-Experience in working collaboratively with other engineers in a team environment.
-Hands-on experience with cloud infrastructure (AWS, GCP or Azure) and distributed system concepts.
-Experience with CI/CD, automated testing, code documentation, and clean-code practices.
-Fluency in English (Japanese is not required), equivalent to CEFR B2 level or above (e.g., TOEIC 785+).
-Interested in open source/tech community activities
-Nice to haves
-
-While not specifically required, tell us if you have any of the following.
-
-Degree in Computer Science or other related technical fields.
-Experience building large-scale distributed systems or SaaS products.
-Knowledge of web-security, access-control, email-or-storage-systems domains.
-Knowledge of DevOps tools and practices (CI/CD, Infrastructure as Code).
-Knowledge of DevOps tools and practices (CI/CD, Infrastructure as Code)
-Knowledge of Linux / MacOS / Unix-like environments.
-Compensation
-
-¥7,000,000 ~ ¥9,000,000 annually.
-
-Our salary range is inclusive of English Allowance & Physical Communication Bonus - please check the details below, with the final amount determined based on your experience and skills.
-
-Please refer to our Company Introduction Deck for an explanation of our Assessment System and the Belt System, which we use to determine the candidate’s salary range.
-
-Benefits
-
-English Allowance and Advanced Language Expert Allowance: JPY 10,000 ~ JPY 130,000 per month, paid alongside base salary, if the employee fulfills the requirements.
-Physical Communication Bonus: JPY 4,000 per day, applicable from October 2025 onwards, for coming to the office and interacting with other employees, paid out as bonus according to the number of days.
-
-Details will be provided at the offer meeting.","","","","","","","","","Apply from abroad, Backend, Go, React","","","","",""
 "","tokyodev","https://www.tokyodev.com/companies/ai-robot-association/jobs/research-scientist-robotics","/jobs/apply-from-abroad","Research Scientist (Robotics)","AI Robot Association","Tokyo, Japan","2026-01-26","","","","","","",True,"","","","","Language requirements: Business English
 
 For researchers, this means an opportunity to:
@@ -793,7 +710,7 @@ While not specifically required, tell us if you have any of the following.
 Passion for mobile games and game design sensibilities
 Strong understanding of and ability to tweak VFX, lighting, and other assets as needed
 Great technical implementation knowledge and scripting experience","","","","","","","","","Apply from abroad, Game Development, Unity 3D","","","","",""
-"","tokyodev","https://www.tokyodev.com/companies/wovn/jobs/fullstack-engineer","/jobs/apply-from-abroad","Fullstack Engineer","WOVN","Tokyo, Japan","2026-01-26","","direct_data","yearly",6000000.0,9000000.0,"JPY",True,"","","","","Language requirements: Conversational English
+"","tokyodev","https://www.tokyodev.com/companies/wovn/jobs/fullstack-engineer","/c/wovn/j/fullstack-engineer/applications/new","Fullstack Engineer","WOVN","Tokyo, Japan","2026-01-26","","direct_data","yearly",6000000.0,9000000.0,"JPY",True,"","","","","Language requirements: Conversational English
 
 We build products that make websites, apps, and media multilingual:
 
@@ -919,7 +836,7 @@ Interest or knowledge in the medical device or prosthetics & orthotics domain
 Compensation
 
 ¥4,500,000 ~ ¥9,000,000 annually.","","","","","","","","","Apply from abroad, React, Frontend","","","","",""
-"","tokyodev","https://www.tokyodev.com/companies/paypay-card-corporation/jobs/automation-qa-engineer","/c/paypay-card-corporation/j/automation-qa-engineer/applications/new","Automation QA Engineer","PayPay Card Corporation","Tokyo, Japan","2026-01-26","","","","","","",True,"","","","","Language requirements: Business English
+"","tokyodev","https://www.tokyodev.com/companies/paypay-card-corporation/jobs/automation-qa-engineer","/jobs/apply-from-abroad","Automation QA Engineer","PayPay Card Corporation","Tokyo, Japan","2026-01-26","","","","","","",True,"","","","","Language requirements: Business English
 
 We are seeking a full-stack QA engineer who can perform both manual and automated testing in the role of SDET. This position requires an individual who is strong in automating backend services, APIs, and microservices, while also being flexible in manual testing such as exploratory testing and usability verification.You will contribute to improving the quality of the entire PayPay Card system by formulating quality strategies, improving QA processes, and mentoring the team.
 
@@ -1101,3 +1018,86 @@ Familiarity with containerized environments (Docker, Kubernetes).
 Hands-on experience in operating AWS Aurora database (Postgres/Mysql compatible)
 Hands-on experience in operating AWS RDS for ORACLE
 Japanese conversational proficiency is a plus","","","","","","","","","Apply from abroad, AWS, Database Administration, DevOps","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/slacker-apps/jobs/ai-chatbot-engineer","/c/slacker-apps/j/ai-chatbot-engineer/applications/new","AI Chatbot Engineer","Slacker Apps","Tokyo, Japan","2026-01-08","","direct_data","yearly",5000000.0,8000000.0,"JPY",True,"","","","","Language requirements: Business English
+
+We’re looking for an engineer to take ownership of our AI orchestration layer for real-time AI character interaction products used in conversational attractions and live experiences. You’ll evolve the foundations built by our partner and bring the system fully in-house — focusing on latency, reliability, multi-routine orchestration, guardrails, and real-time character interaction.
+
+This is a lead-level role for someone excited to own Slacker Apps’ AI systems, stay close to the latest advancements in the AI space, and work hands-on with our team to turn cutting-edge technology into AAA-quality products for world-known clients.
+
+Responsibilities
+Maintain and expand our LLM-based orchestration layer (routing, routines, memory, intent handling).
+Design robust conversation flows with guardrails suitable for public-facing attractions.
+Integrate STT, TTS, RAG, and animation triggers for real-time character interactions.
+Work closely with Unity developers, designers, and animators to deliver low-latency, expressive character experiences.
+Optimise systems for both on-prem and off-prem GPU deployment (4090/5090 boxes, RunPod-style orchestration).
+Evaluate new models, tools, and approach
+Requirements
+2+ years professional development experience required
+Strong backend engineering experience in Python or Node.js.
+Hands-on experience integrating LLMs (OpenAI, Anthropic, fine-tuned models, vector databases).
+Experience building real-time or low-latency systems.
+Solid understanding of GPU-based inference and local/remote deployment strategies.
+Ability to design systems that are stable, observable, and maintainable in production environments.
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Experience leading or owning AI systems in production.
+Familiarity with real-time audio pipelines (STT/TTS streaming).
+Experience with character-driven or conversational UX (games, virtual humans, chatbots, assistants).
+Knowledge of prompt engineering, fine-tuning workflows, or evaluation tooling.
+Experience with containerisation, orchestration, or scalable inference infrastructure.
+Interest in AI safety, guardrails, and content moderation for public-facing products.
+Curiosity and enthusiasm for staying up to date with the rapidly evolving AI landscape.
+Compensation
+
+¥5,000,000 ~ ¥8,000,000 annually.","","","","","","","","","Apply from abroad, Machine Learning, Python","","","","",""
+"","tokyodev","https://www.tokyodev.com/companies/hennge/jobs/junior-software-engineer-go-web-dev","/jobs/apply-from-abroad","Software Engineer (Go / Web Dev)","HENNGE","Tokyo, Japan","2025-12-18","","direct_data","yearly",7000000.0,9000000.0,"JPY",True,"","","","","Language requirements: Business English
+
+We’re looking for a software engineer to take ownership of backend and web-platform development. You’ll join the File DLP Team, building and maintaining the File DLP product within the HENNGE One suite.
+
+As one of the newer products in our lineup, File DLP is still evolving — you’ll work closely with us to explore new ideas, shape features from discovery to delivery, and bring impactful solutions to our customers. As the product continues to grow rapidly, you’ll also tackle scalability challenges and be expected to develop creative, forward-looking solutions to ensure reliability and performance at scale.
+
+While your main focus will be backend development, the team values full-stack and cross-functional collaboration — giving you opportunities to explore the frontend and work closely with stakeholders to deepen your understanding of the business and how our product creates value for customers.
+
+Tech Stack: Golang, React, Graphql, PostgreSQL, Terraform, Temporal, AWS
+
+Responsibilities
+Design, build, and maintain new features for HENNGE One, using Go and other web technologies.
+Automate deployment, testing, monitoring and documentation via CI/CD pipelines and infrastructure-as-code.
+Participate actively in product discovery processes that involve Product Management, Design, and Customer Success teams to deliver high-quality user experiences.
+Participate actively in code reviews, discussions and technical decision-making.
+Assess risks in system architecture designs.
+Work collaboratively with other engineers in a team environment, and contribute to improving team process & engineering culture.
+Requirements
+2+ years of experience developing production-scale web applications using Go.
+Experience in developing full-stack applications.
+Experience in working collaboratively with other engineers in a team environment.
+Hands-on experience with cloud infrastructure (AWS, GCP or Azure) and distributed system concepts.
+Experience with CI/CD, automated testing, code documentation, and clean-code practices.
+Fluency in English (Japanese is not required), equivalent to CEFR B2 level or above (e.g., TOEIC 785+).
+Interested in open source/tech community activities
+Nice to haves
+
+While not specifically required, tell us if you have any of the following.
+
+Degree in Computer Science or other related technical fields.
+Experience building large-scale distributed systems or SaaS products.
+Knowledge of web-security, access-control, email-or-storage-systems domains.
+Knowledge of DevOps tools and practices (CI/CD, Infrastructure as Code).
+Knowledge of DevOps tools and practices (CI/CD, Infrastructure as Code)
+Knowledge of Linux / MacOS / Unix-like environments.
+Compensation
+
+¥7,000,000 ~ ¥9,000,000 annually.
+
+Our salary range is inclusive of English Allowance & Physical Communication Bonus - please check the details below, with the final amount determined based on your experience and skills.
+
+Please refer to our Company Introduction Deck for an explanation of our Assessment System and the Belt System, which we use to determine the candidate’s salary range.
+
+Benefits
+
+English Allowance and Advanced Language Expert Allowance: JPY 10,000 ~ JPY 130,000 per month, paid alongside base salary, if the employee fulfills the requirements.
+Physical Communication Bonus: JPY 4,000 per day, applicable from October 2025 onwards, for coming to the office and interacting with other employees, paid out as bonus according to the number of days.
+
+Details will be provided at the offer meeting.","","","","","","","","","Apply from abroad, Backend, Go, React","","","","",""
