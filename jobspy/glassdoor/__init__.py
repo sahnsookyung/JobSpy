@@ -50,7 +50,7 @@ class Glassdoor(Scraper):
         self.max_pages = 30
         self.seen_urls = set()
 
-    def scrape(self, scraper_input: ScraperInput) -> JobResponse:
+    def scrape(self, scraper_input: ScraperInput, **kwargs) -> JobResponse:
         """
         Scrapes Glassdoor for jobs with scraper_input criteria.
         :param scraper_input: Information about job search criteria.

@@ -38,7 +38,7 @@ class Google(Scraper):
         self.url = "https://www.google.com/search"
         self.jobs_url = "https://www.google.com/async/callback:550"
 
-    def scrape(self, scraper_input: ScraperInput) -> JobResponse:
+    def scrape(self, scraper_input: ScraperInput, **kwargs) -> JobResponse:
         """
         Scrapes Google for jobs with scraper_input criteria.
         :param scraper_input: Information about job search criteria.

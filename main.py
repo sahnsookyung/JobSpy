@@ -7,7 +7,7 @@ from jobspy.scrapers.japandev_enums import *
 def scrape_originals():
     jobs = scrape_jobs(
         # site_name=["google"], # google isn't very consistent with job postings on search results page, and also the constants can get outdated and replaced (this can be found in the request headers for the most part)
-        site_name=["indeed", "linkedin", "glassdoor"], # "google", "bayt", "naukri", "bdjobs"
+        site_name=["linkedin"], # "google", "bayt", "naukri", "bdjobs"
         search_term="software engineer",
         location="Tokyo",
         results_wanted=20,

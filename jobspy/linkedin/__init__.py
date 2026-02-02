@@ -70,7 +70,7 @@ class LinkedIn(Scraper):
         self.country = "worldwide"
         self.job_url_direct_regex = re.compile(r'(?<=\?url=)[^"]+')
 
-    def scrape(self, scraper_input: ScraperInput) -> JobResponse:
+    def scrape(self, scraper_input: ScraperInput, **kwargs) -> JobResponse:
         """
         Scrapes LinkedIn for jobs with scraper_input criteria
         :param scraper_input:

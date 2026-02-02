@@ -54,7 +54,7 @@ class ZipRecruiter(Scraper):
         self.jobs_per_page = 20
         self.seen_urls = set()
 
-    def scrape(self, scraper_input: ScraperInput) -> JobResponse:
+    def scrape(self, scraper_input: ScraperInput, **kwargs) -> JobResponse:
         """
         Scrapes ZipRecruiter for jobs with scraper_input criteria.
         :param scraper_input: Information about job search criteria.

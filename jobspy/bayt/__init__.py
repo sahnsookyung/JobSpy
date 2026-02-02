@@ -32,7 +32,7 @@ class BaytScraper(Scraper):
         self.session = None
         self.country = "worldwide"
 
-    def scrape(self, scraper_input: ScraperInput) -> JobResponse:
+    def scrape(self, scraper_input: ScraperInput, **kwargs) -> JobResponse:
         self.scraper_input = scraper_input
         self.session = create_session(
             proxies=self.proxies, ca_cert=self.ca_cert, is_tls=False, has_retry=True

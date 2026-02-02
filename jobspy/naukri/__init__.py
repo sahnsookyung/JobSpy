@@ -63,7 +63,7 @@ class Naukri(Scraper):
         self.country = "India"  #naukri is india-focused by default
         log.info("Naukri scraper initialized")
 
-    def scrape(self, scraper_input: ScraperInput) -> JobResponse:
+    def scrape(self, scraper_input: ScraperInput, **kwargs) -> JobResponse:
         """
         Scrapes Naukri API for jobs with scraper_input criteria
         :param scraper_input:

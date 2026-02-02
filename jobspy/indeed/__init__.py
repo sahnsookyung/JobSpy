@@ -47,7 +47,7 @@ class Indeed(Scraper):
         self.base_url = None
         self.api_url = "https://apis.indeed.com/graphql"
 
-    def scrape(self, scraper_input: ScraperInput) -> JobResponse:
+    def scrape(self, scraper_input: ScraperInput, **kwargs) -> JobResponse:
         """
         Scrapes Indeed for jobs with scraper_input criteria
         :param scraper_input:

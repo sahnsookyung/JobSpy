@@ -64,7 +64,7 @@ class BDJobs(Scraper):
         self.scraper_input = None
         self.country = "bangladesh"
 
-    def scrape(self, scraper_input: ScraperInput) -> JobResponse:
+    def scrape(self, scraper_input: ScraperInput, **kwargs) -> JobResponse:
         """
         Scrapes BDJobs for jobs with scraper_input criteria
         :param scraper_input:
