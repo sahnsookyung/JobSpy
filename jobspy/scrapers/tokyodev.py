@@ -420,7 +420,11 @@ class TokyoDev(Scraper):
                     except Exception:
                         pass
 
+                    # Extract job ID from URL for uniqueness
+                    job_id = seed.job_url.rstrip("/").rsplit("/", 1)[-1] if seed.job_url else "unknown"
+
                     job_post = JobPost(
+                        id=f"td-{job_id}",
                         title=title,
                         company_name=company_name,
                         job_url=seed.job_url,

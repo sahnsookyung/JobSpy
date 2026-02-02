@@ -437,8 +437,12 @@ class JapanDev(Scraper):
                         city=final_location_text,
                     )
 
+                    # Extract job ID from URL for uniqueness
+                    job_id = job_url.rstrip("/").rsplit("/", 1)[-1] if job_url else "unknown"
+
                     job_list.append(
                         JobPost(
+                            id=f"jd-{job_id}",
                             title=final_title,
                             company_name=final_company,
                             job_url=job_url,
