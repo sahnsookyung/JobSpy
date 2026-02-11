@@ -1,3 +1,5 @@
+# Version 1.0.1 - Feb 12 2026
+
 # Force AMD64 to allow official Chrome. chrome is needed to avoid getting served interstitials for TokyoDev.
 # In other words, if you don't need TokyoDev, you can modify the line below and build the image for arm64 which results in significant speedups for Apple Silicon Macs. Note that this ref also exists in the dockerhub-release.yml.
 FROM --platform=linux/amd64 python:3.11-slim
@@ -20,7 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
 
 # 3. Install Browsers AND System Deps automatically
 # --with-deps detects the OS (Debian 12) and installs the correct libs
-RUN playwright install chrome chromium --with-deps
+RUN playwright install chrome --with-deps
 
 # 4. Copy code
 COPY . .
