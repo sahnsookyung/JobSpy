@@ -1,4 +1,5 @@
-# Force AMD64 to allow official Chrome. chrome is needed to avoid getting served interstitials
+# Force AMD64 to allow official Chrome. chrome is needed to avoid getting served interstitials for TokyoDev.
+# In other words, if you don't need TokyoDev, you can modify the line below and build the image for arm64 which results in significant speedups for Apple Silicon Macs.
 FROM --platform=linux/amd64 python:3.11-slim
 
 # 1. Install minimal tools for Playwright's installer script
