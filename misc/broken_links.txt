@@ -1,0 +1,47 @@
+https://www.aalyria.com/jobs | 404
+https://bevelop.de | <urlopen error [SSL: TLSV1_UNRECOGNIZED_NAME] tlsv1 unrecognized name (_ssl.c:1035)>
+https://cabify.careers/en/ | 404
+https://boards.greenhouse.io/cakedefi | 404
+https://kelas.colearn.id/career | <urlopen error [Errno 8] nodename nor servname provided, or not known>
+https://angel.co/company/cquence-app/jobs | 403
+https://ciandt.com/us/en-us/careers/open-positions | 403
+https://chargify.com/jobs | 404
+https://deliverycenter.gupy.io | 404
+https://despark.com | 500
+https://jobs.facile.it | 403
+https://boards.greenhouse.io/fetchrewards | 404
+https://food52.com/pages/food52-jobs | 429
+https://hashnode.com/careers | <urlopen error [Errno 8] nodename nor servname provided, or not known>
+https://www.geosite.io | 405
+https://www.chatgrape.com/jobs/ | 405
+https://gtmsportswear.com/careers | 526
+iheartjane.com | unknown url type: 'iheartjane.com'
+https://jobs.lever.co/JOURNEE | 404
+https://www.innoviacolabs.com | 404
+https://litmus.com/careers#openings | 404
+https://www.moteefe.com/jobs | <urlopen error [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1035)>
+https://nodesource.com/careers | 404
+https://www.oakstreethealth.com/careers | 403
+https://www.nurx.com/technology/ | 404
+https://oreilly.com/jobs | 403
+https://lifeatnedap.com/vacatures | 404
+https://jobs.coxenterprises.com/home-technology/ | 405
+https://empleo.pfsgroup.es | 404
+https://www.primary.com/jobs | 404
+https://resin.io | 405
+https://fauna.com | <urlopen error _ssl.c:1018: The handshake operation timed out>
+https://www.progressive.com/careers/ | 403
+https://www.rockerbox.com/careers | <urlopen error [Errno 61] Connection refused>
+http://sentisis.com/trabaja-con-nosotros | 404
+VerticalChange | unknown url type: 'VerticalChange'
+https://blog.showmax.com/engineering-careers | 404
+https://www.stashaway.sg/careers | 429
+https://gmfinancial.com/en-us/company/careers.html | <urlopen error _ssl.c:1018: The handshake operation timed out>
+https://smartia.tech | 403
+https://surglogs.com/careers/slovakia/ | 403
+https://boards.greenhouse.io/trov | 404
+https://www.urbdyn.com/careers | 404
+https://weedmaps.com/careers | 406
+https://www.pento.io | The read operation timed out
+https://voltra.co | <urlopen error _ssl.c:1018: The handshake operation timed out>
+https://5minds.de | <urlopen error _ssl.c:1018: The handshake operation timed out>
