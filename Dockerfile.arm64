@@ -1,0 +1,18 @@
+# Native ARM64 production image. The bundled Playwright Chromium variant passed
+# the TokyoDev/JapanDev OCI acceptance probe and avoids AMD64 Chrome under QEMU.
+FROM --platform=linux/arm64 python:3.11-slim
+
+ENV JOBSPY_PLAYWRIGHT_CHANNEL=bundled
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir fastapi uvicorn \
+    && playwright install chromium --with-deps
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "api_server:app", "--host", "0.0.0.0", "--port", "8000"]

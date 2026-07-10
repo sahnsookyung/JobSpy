@@ -51,8 +51,9 @@ jobs:
         with:
           context: .
           push: true
-          # Your Dockerfile forces amd64 already; this makes it explicit in CI.
-          platforms: linux/amd64
+          # Native ARM64 Chromium passed the OCI TokyoDev/JapanDev acceptance probe.
+          file: Dockerfile.arm64
+          platforms: linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           # Optional, but good for public images:
