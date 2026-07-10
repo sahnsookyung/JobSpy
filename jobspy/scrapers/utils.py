@@ -1,11 +1,68 @@
-from playwright.sync_api import Browser, BrowserContext, Page, sync_playwright
 import logging
-from typing import Optional
+import os
+from contextlib import contextmanager
+from typing import Iterator, Optional
 from urllib.parse import urlparse
 import random
 import time
 
+from playwright.sync_api import Browser, BrowserContext, Page, sync_playwright
+
 logger = logging.getLogger(__name__)
+
+_CONSTRAINED_RUNTIME_BROWSER_ARGS = (
+    "--disable-gpu",
+    "--disable-software-rasterizer",
+    "--disable-extensions",
+    "--disable-background-networking",
+    "--no-first-run",
+    "--no-default-browser-check",
+)
+
+
+def launch_playwright_browser(playwright) -> Browser:
+    """Launch the configured browser with stable flags for QEMU/Docker runtimes."""
+    channel = os.getenv("JOBSPY_PLAYWRIGHT_CHANNEL", "chrome").strip().lower()
+    launch_options = {
+        "headless": True,
+        "args": list(_CONSTRAINED_RUNTIME_BROWSER_ARGS),
+    }
+    if channel in {"", "bundled", "chromium"}:
+        return playwright.chromium.launch(**launch_options)
+    return playwright.chromium.launch(channel=channel, **launch_options)
+
+
+@contextmanager
+def managed_playwright_context(
+    *,
+    proxy: Optional[dict] = None,
+    user_agent: Optional[str] = None,
+    request_timeout: int = 30,
+) -> Iterator[BrowserContext]:
+    """Yield a context and deterministically close its pages, context, and browser."""
+    browser: Optional[Browser] = None
+    context: Optional[BrowserContext] = None
+    with sync_playwright() as playwright:
+        try:
+            browser = launch_playwright_browser(playwright)
+            context = create_playwright_context(
+                browser,
+                proxy=proxy,
+                user_agent=user_agent,
+                request_timeout=request_timeout,
+            )
+            yield context
+        finally:
+            if context is not None:
+                try:
+                    context.close()
+                except Exception:
+                    logger.warning("Failed to close Playwright browser context", exc_info=True)
+            if browser is not None:
+                try:
+                    browser.close()
+                except Exception:
+                    logger.warning("Failed to close Playwright browser", exc_info=True)
 
 def parse_proxy_string(proxy_str: str) -> dict:
     if not proxy_str:

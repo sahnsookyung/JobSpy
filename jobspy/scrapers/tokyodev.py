@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 import logging
-import os
 import re
 import time
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional, List, Tuple
 from urllib.parse import urljoin, urlencode
-
-from playwright.sync_api import sync_playwright
 
 from jobspy.model import (
     Scraper,
@@ -25,7 +22,7 @@ from jobspy.model import (
     CompensationInterval,
 )
 from jobspy.scrapers.utils import (
-    create_playwright_context,
+    managed_playwright_context,
     setup_page,
     parse_proxy_string,
     wait_for_cloudflare_to_clear,
@@ -35,13 +32,6 @@ from enum import Enum
 from jobspy.scrapers.tokyodev_enums import JapaneseLevel, EnglishLevel, ApplicantLocation, Seniority, Salary
 
 logger = logging.getLogger(__name__)
-
-
-def _launch_browser(playwright):
-    channel = os.getenv("JOBSPY_PLAYWRIGHT_CHANNEL", "chrome").strip().lower()
-    if channel in {"", "bundled", "chromium"}:
-        return playwright.chromium.launch(headless=True)
-    return playwright.chromium.launch(channel=channel, headless=True)
 
 
 @dataclass
@@ -336,14 +326,11 @@ class TokyoDev(Scraper):
                 proxy_str = self.proxies
         proxy = parse_proxy_string(proxy_str) if proxy_str else None
 
-        with sync_playwright() as p:
-            browser = _launch_browser(p)
-            context = create_playwright_context(
-                browser,
+        with managed_playwright_context(
                 proxy=proxy,
                 user_agent=self.user_agent,
                 request_timeout=scraper_input.request_timeout,
-            )
+        ) as context:
 
             # Safer vs Cloudflare: do NOT block fonts/stylesheets; your utils only blocks images/media anyway.
             list_page = setup_page(context, block_resources=False)
