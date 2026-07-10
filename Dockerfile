@@ -1,15 +1,17 @@
-# Version 1.0.1 - Feb 12 2026
+# Version 1.1.0 - Jul 10 2026
 
 # Force AMD64 to allow official Chrome. chrome is needed to avoid getting served interstitials for TokyoDev.
 # In other words, if you don't need TokyoDev, you can modify the line below and build the image for arm64 which results in significant speedups for Apple Silicon Macs. Note that this ref also exists in the dockerhub-release.yml.
 FROM --platform=linux/amd64 python:3.11-slim
 
+ENV JOBSPY_PLAYWRIGHT_CHANNEL=chrome
+
 # 1. Install minimal tools for Playwright's installer script
 # (It needs wget/curl/gpg to fetch Chrome repos)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     gnupg \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 WORKDIR /app
 

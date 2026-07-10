@@ -5,9 +5,11 @@ Tests multiple scrapers to verify the generic implementation.
 """
 import requests
 import json
+import os
 import time
 
 API_URL = "http://localhost:8000"
+API_TOKEN = os.environ.get("JOBSPY_API_TOKEN", "")
 
 def submit_job(site_type, search_term=None, location=None, results_wanted=3, options=None, **kwargs):
     """Submit a scraping job and return the task ID."""
@@ -28,7 +30,12 @@ def submit_job(site_type, search_term=None, location=None, results_wanted=3, opt
     print(f"Request: {json.dumps(payload, indent=2)}")
     
     try:
-        response = requests.post(f"{API_URL}/scrape", json=payload, timeout=10)
+        response = requests.post(
+            f"{API_URL}/scrape",
+            json=payload,
+            headers={"X-JobSpy-Token": API_TOKEN},
+            timeout=10,
+        )
         print(f"Response Code: {response.status_code}")
         response.raise_for_status()
         result = response.json()
@@ -50,7 +57,11 @@ def check_status(task_id, max_wait=120):
     start_time = time.time()
     while time.time() - start_time < max_wait:
         try:
-            response = requests.get(f"{API_URL}/status/{task_id}", timeout=10)
+            response = requests.get(
+                f"{API_URL}/status/{task_id}",
+                headers={"X-JobSpy-Token": API_TOKEN},
+                timeout=10,
+            )
             response.raise_for_status()
             result = response.json()
             
@@ -108,33 +119,6 @@ def test_scrapers():
                 "applicant_locations": ["candidate_location_anywhere"]
             }
         },
-        {
-            "site_type": ["indeed"],
-            "search_term": "software engineer",
-            "location": "Tokyo",
-            "country": "Japan",
-            "results_wanted": 3,
-            "hours_old": 24*7,
-            "options": {}
-        },
-        {
-            "site_type": ["linkedin"],
-            "search_term": "software engineer",
-            "location": "Tokyo",
-            "results_wanted": 3,
-            "hours_old": 168,
-            "linkedin_fetch_description": True,
-            "options": {}
-        },
-        {
-            "site_type": ["glassdoor"],
-            "search_term": "software engineer",
-            "location": "Tokyo",
-            "results_wanted": 3,
-            "hours_old": 168,
-            "request_timeout": 60*5, # 5 mins
-            "options": {}
-        }
     ]
     
     results = []

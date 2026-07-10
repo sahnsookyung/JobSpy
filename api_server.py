@@ -1,168 +1,256 @@
-import uuid
-import logging
-from typing import List, Optional, Dict, Any
-from fastapi import FastAPI, BackgroundTasks, HTTPException
-from pydantic import BaseModel, Field, field_validator
+"""Bounded, authenticated internal API for the custom JobSpy scrapers."""
 
-# Import JobSpy core
-from jobspy.model import ScraperInput, Site, JobType, Country, DescriptionFormat
-from jobspy.scrapers.tokyodev import TokyoDev
+import hmac
+import logging
+import os
+import threading
+import time
+import uuid
+from typing import Any, Optional
+
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, status
+from pydantic import Field, field_validator, model_validator
+
+from jobspy.model import Country, DescriptionFormat, JobType, ScraperInput, Site
 from jobspy.scrapers.japandev import JapanDev
-from jobspy.indeed import Indeed
-from jobspy.linkedin import LinkedIn
-from jobspy.glassdoor import Glassdoor
-from jobspy.ziprecruiter import ZipRecruiter
-from jobspy.google import Google
-from jobspy.bayt import BaytScraper
-from jobspy.naukri import Naukri
-from jobspy.bdjobs import BDJobs
+from jobspy.scrapers.tokyodev import TokyoDev
+
+
+DEFAULT_ALLOWED_SITES = frozenset({"tokyodev", "japandev"})
+DEFAULT_MAX_RESULTS = 25
+DEFAULT_TASK_TTL_SECONDS = 3600
 
 SCRAPER_MAPPING = {
-    Site.LINKEDIN: LinkedIn,
-    Site.INDEED: Indeed,
-    Site.ZIP_RECRUITER: ZipRecruiter,
-    Site.GLASSDOOR: Glassdoor,
-    Site.GOOGLE: Google,
-    Site.BAYT: BaytScraper,
-    Site.NAUKRI: Naukri,
-    Site.BDJOBS: BDJobs,
     Site.TOKYODEV: TokyoDev,
     Site.JAPANDEV: JapanDev,
 }
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("api_server")
-app = FastAPI(title="JobSpy Scraper API")
-JOB_STORE: Dict[str, Dict[str, Any]] = {}
+app = FastAPI(title="JobScout JobSpy Scraper API")
+JOB_STORE: dict[str, dict[str, Any]] = {}
+JOB_STORE_LOCK = threading.Lock()
 
-# --- Request Model ---
+
+def _positive_int_env(name: str, default: int) -> int:
+    raw = os.getenv(name, "").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    return value if value > 0 else default
+
+
+def _allowed_sites() -> frozenset[str]:
+    configured = {
+        value.strip().lower()
+        for value in os.getenv("JOBSPY_ALLOWED_SITES", "").split(",")
+        if value.strip()
+    }
+    return frozenset(configured) if configured else DEFAULT_ALLOWED_SITES
+
+
+TASK_TTL_SECONDS = _positive_int_env("JOBSPY_TASK_TTL_SECONDS", DEFAULT_TASK_TTL_SECONDS)
+SCRAPE_SEMAPHORE = threading.BoundedSemaphore(
+    _positive_int_env("JOBSPY_MAX_CONCURRENT_JOBS", 1)
+)
+
+
+def _cleanup_expired_tasks() -> None:
+    expires_before = time.monotonic() - TASK_TTL_SECONDS
+    with JOB_STORE_LOCK:
+        expired_task_ids = [
+            task_id
+            for task_id, task in JOB_STORE.items()
+            if float(task.get("_updated_at", 0.0)) < expires_before
+        ]
+        for task_id in expired_task_ids:
+            JOB_STORE.pop(task_id, None)
+
+
+def _store_task(task_id: str, **values: Any) -> None:
+    with JOB_STORE_LOCK:
+        JOB_STORE[task_id] = {
+            **values,
+            "_updated_at": time.monotonic(),
+        }
+
+
+def _public_task(task: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in task.items() if not key.startswith("_")}
+
+
+def _require_api_token(
+    x_jobspy_token: Optional[str] = Header(default=None),
+) -> None:
+    expected_token = os.getenv("JOBSPY_API_TOKEN", "").strip()
+    if not expected_token:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="JobSpy API token is not configured",
+        )
+    if not x_jobspy_token or not hmac.compare_digest(x_jobspy_token, expected_token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid JobSpy API token",
+        )
+
+
+def _acquire_scrape_slot() -> None:
+    if not SCRAPE_SEMAPHORE.acquire(blocking=False):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="A JobSpy scrape is already running",
+        )
+
+
 class ScrapeRequest(ScraperInput):
-    # We inherit site_type from ScraperInput, but we can add validation or description if needed.
-    # ScraperInput defines: site_type: list[Site]
-    
-    options: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Scraper-specific options")
+    """One bounded scrape request for a configured JobScout source."""
 
-    # Validator for site_type to handle string inputs (e.g. ["indeed", "linkedin"])
-    @field_validator('site_type', mode='before')
-    @classmethod
-    def validate_site_type(cls, v):
-        if isinstance(v, list):
-            sites = []
-            for site in v:
-                if isinstance(site, Site):
-                    sites.append(site)
-                elif isinstance(site, str):
-                    try:
-                        # Try mapping by Name (INDEED) or Value ("indeed")
-                        try:
-                            sites.append(Site[site.upper()])
-                        except KeyError:
-                            sites.append(Site(site.lower()))
-                    except ValueError:
-                        raise ValueError(f"Invalid site: {site}")
-            return sites
-        return v
+    options: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Scraper-specific options",
+    )
 
-    @field_validator('country', mode='before')
+    @field_validator("site_type", mode="before")
     @classmethod
-    def parse_country(cls, v):
-        if isinstance(v, str):
+    def validate_site_type(cls, value: Any) -> Any:
+        if not isinstance(value, list):
+            return value
+
+        sites: list[Site] = []
+        for site in value:
+            if isinstance(site, Site):
+                sites.append(site)
+                continue
+            if not isinstance(site, str):
+                raise ValueError(f"Invalid site: {site}")
             try:
-                return Country.from_string(v)
-            except ValueError:
-                raise ValueError(f"Invalid country: {v}")
-        return v
+                sites.append(Site[site.upper()])
+            except KeyError:
+                try:
+                    sites.append(Site(site.lower()))
+                except ValueError as exc:
+                    raise ValueError(f"Invalid site: {site}") from exc
+        return sites
 
-    @field_validator('job_type', mode='before')
+    @field_validator("country", mode="before")
     @classmethod
-    def parse_job_type(cls, v):
-        if isinstance(v, str):
-            for jt in JobType:
-                if jt.name.lower() == v.lower():
-                    return jt
-            for jt in JobType:
-                if v.lower() in jt.value:
-                    return jt
-            raise ValueError(f"Invalid job_type: {v}")
-        return v
-
-    @field_validator('description_format', mode='before')
-    @classmethod
-    def parse_description_format(cls, v):
-        if isinstance(v, str):
+    def parse_country(cls, value: Any) -> Any:
+        if isinstance(value, str):
             try:
-                return DescriptionFormat(v.lower())
+                return Country.from_string(value)
+            except ValueError as exc:
+                raise ValueError(f"Invalid country: {value}") from exc
+        return value
+
+    @field_validator("job_type", mode="before")
+    @classmethod
+    def parse_job_type(cls, value: Any) -> Any:
+        if not isinstance(value, str):
+            return value
+        for job_type in JobType:
+            if job_type.name.lower() == value.lower() or value.lower() in job_type.value:
+                return job_type
+        raise ValueError(f"Invalid job_type: {value}")
+
+    @field_validator("description_format", mode="before")
+    @classmethod
+    def parse_description_format(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            try:
+                return DescriptionFormat(value.lower())
             except ValueError:
                 return DescriptionFormat.MARKDOWN
-        return v
+        return value
 
-# --- Background Worker ---
-def run_scraper_task(task_id: str, request: ScrapeRequest):
+    @field_validator("results_wanted")
+    @classmethod
+    def validate_results_wanted(cls, value: int) -> int:
+        if value < 1 or value > DEFAULT_MAX_RESULTS:
+            raise ValueError(f"results_wanted must be between 1 and {DEFAULT_MAX_RESULTS}")
+        return value
+
+    @model_validator(mode="after")
+    def validate_allowed_site(self) -> "ScrapeRequest":
+        if len(self.site_type) != 1:
+            raise ValueError("exactly one site_type is required")
+        site = self.site_type[0].value
+        if site not in _allowed_sites():
+            raise ValueError(f"site '{site}' is not enabled")
+        return self
+
+
+def run_scraper_task(task_id: str, request: ScrapeRequest) -> None:
+    """Run one scraper and always release the slot reserved by the API route."""
+    site = request.site_type[0]
     try:
-        logger.info(f"Task {task_id}: Starting scrape for sites: {[s.name for s in request.site_type]}")
-        
-        all_jobs = []
-        
-        # Iterate over all requested sites
-        for site_enum in request.site_type:
-            scraper_class = SCRAPER_MAPPING.get(site_enum)
-            if not scraper_class:
-                logger.warning(f"Scraper for {site_enum.name} not configured, skipping.")
-                continue
-            
-            try:
-                scraper = scraper_class()
-                # We pass the full request object because it IS a ScraperInput
-                results = scraper.scrape(request, **(request.options or {}))
-                all_jobs.extend(results.jobs)
-            except Exception as e:
-                logger.error(f"Error scraping {site_enum.name}: {e}")
-                # We continue to next site even if one fails
-        
-        # Save aggregated results
-        jobs_data = [job.dict() for job in all_jobs]
-        JOB_STORE[task_id] = {
-            "status": "completed",
-            "count": len(jobs_data),
-            "data": jobs_data
-        }
-        logger.info(f"Task {task_id}: Completed with {len(jobs_data)} jobs")
+        logger.info("Task %s: starting scrape for %s", task_id, site.value)
+        scraper_class = SCRAPER_MAPPING[site]
+        scraper = scraper_class()
+        results = scraper.scrape(request, **request.options)
+        jobs_data = [job.model_dump() for job in results.jobs]
+        _store_task(
+            task_id,
+            status="completed",
+            count=len(jobs_data),
+            data=jobs_data,
+        )
+        logger.info("Task %s: completed with %s jobs", task_id, len(jobs_data))
+    except Exception as exc:
+        logger.exception("Task %s: scrape failed", task_id)
+        _store_task(task_id, status="failed", error=str(exc))
+    finally:
+        SCRAPE_SEMAPHORE.release()
 
-    except Exception as e:
-        logger.error(f"Task {task_id}: Failed - {str(e)}")
-        JOB_STORE[task_id] = {"status": "failed", "error": str(e)}
 
-# --- Endpoints ---
-@app.post("/scrape", status_code=202)
-async def submit_scrape_job(request: ScrapeRequest, background_tasks: BackgroundTasks):
-    """
-    Submits a scraping job.
-    Accepts generic ScraperInput fields + 'options' dictionary.
-    """
-    if not request.site_type:
-         raise HTTPException(status_code=400, detail="site_type list cannot be empty")
-
+@app.post("/scrape", status_code=status.HTTP_202_ACCEPTED)
+async def submit_scrape_job(
+    request: ScrapeRequest,
+    background_tasks: BackgroundTasks,
+    _: None = Depends(_require_api_token),
+) -> dict[str, str]:
+    """Submit one bounded, allowlisted scraping task."""
+    _cleanup_expired_tasks()
+    _acquire_scrape_slot()
     task_id = str(uuid.uuid4())
-    JOB_STORE[task_id] = {"status": "processing"}
-    background_tasks.add_task(run_scraper_task, task_id, request)
-    
+    _store_task(task_id, status="processing")
+    try:
+        background_tasks.add_task(run_scraper_task, task_id, request)
+    except Exception:
+        SCRAPE_SEMAPHORE.release()
+        raise
     return {
         "task_id": task_id,
         "status": "processing",
-        "message": "Job submitted."
+        "message": "Job submitted.",
     }
 
+
 @app.get("/status/{task_id}")
-async def check_job_status(task_id: str):
-    job = JOB_STORE.get(task_id)
+async def check_job_status(
+    task_id: str,
+    _: None = Depends(_require_api_token),
+) -> dict[str, Any]:
+    """Return a task state, including terminal failures as ordinary task data."""
+    _cleanup_expired_tasks()
+    with JOB_STORE_LOCK:
+        job = JOB_STORE.get(task_id)
+        if job is not None:
+            job = dict(job)
     if not job:
-        raise HTTPException(status_code=404, detail="Task ID not found")
-    
-    if job.get("status") == "failed":
-        raise HTTPException(status_code=500, detail=job)
-        
-    return job
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task ID not found")
+    return _public_task(job)
+
 
 @app.get("/health")
-def health():
-    return {"status": "ok", "jobs_in_memory": len(JOB_STORE)}
+def health() -> dict[str, Any]:
+    """Unauthenticated container health endpoint."""
+    _cleanup_expired_tasks()
+    with JOB_STORE_LOCK:
+        task_count = len(JOB_STORE)
+    return {
+        "status": "ok",
+        "jobs_in_memory": task_count,
+        "allowed_sites": sorted(_allowed_sites()),
+    }

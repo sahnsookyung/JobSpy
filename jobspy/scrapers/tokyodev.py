@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 import time
 from dataclasses import dataclass
@@ -34,6 +35,13 @@ from enum import Enum
 from jobspy.scrapers.tokyodev_enums import JapaneseLevel, EnglishLevel, ApplicantLocation, Seniority, Salary
 
 logger = logging.getLogger(__name__)
+
+
+def _launch_browser(playwright):
+    channel = os.getenv("JOBSPY_PLAYWRIGHT_CHANNEL", "chrome").strip().lower()
+    if channel in {"", "bundled", "chromium"}:
+        return playwright.chromium.launch(headless=True)
+    return playwright.chromium.launch(channel=channel, headless=True)
 
 
 @dataclass
@@ -329,7 +337,7 @@ class TokyoDev(Scraper):
         proxy = parse_proxy_string(proxy_str) if proxy_str else None
 
         with sync_playwright() as p:
-            browser = p.chromium.launch(channel="chrome", headless=True)
+            browser = _launch_browser(p)
             context = create_playwright_context(
                 browser,
                 proxy=proxy,

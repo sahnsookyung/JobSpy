@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -62,6 +63,13 @@ except Exception:
     )
 
 logger = logging.getLogger(__name__)
+
+
+def _launch_browser(playwright):
+    channel = os.getenv("JOBSPY_PLAYWRIGHT_CHANNEL", "chrome").strip().lower()
+    if channel in {"", "bundled", "chromium"}:
+        return playwright.chromium.launch(headless=True)
+    return playwright.chromium.launch(channel=channel, headless=True)
 
 
 @dataclass(frozen=True)
@@ -336,7 +344,7 @@ class JapanDev(Scraper):
         proxy = parse_proxy_string(proxy_str) if proxy_str else None
 
         with sync_playwright() as p:
-            browser = p.chromium.launch(channel="chrome", headless=True)
+            browser = _launch_browser(p)
             context = create_playwright_context(
                 browser,
                 proxy=proxy,
