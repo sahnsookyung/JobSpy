@@ -20,6 +20,11 @@ _CONSTRAINED_RUNTIME_BROWSER_ARGS = (
 )
 
 
+def remaining_timeout_ms(deadline: float) -> int:
+    """Return the remaining request budget in milliseconds without going negative."""
+    return max(0, int((deadline - time.monotonic()) * 1000))
+
+
 def launch_playwright_browser(playwright) -> Browser:
     """Launch the configured browser with stable flags for QEMU/Docker runtimes."""
     channel = os.getenv("JOBSPY_PLAYWRIGHT_CHANNEL", "chrome").strip().lower()
@@ -130,6 +135,7 @@ def create_playwright_context(
     """)
 
     context.set_default_timeout(request_timeout * 1000)
+    context.set_default_navigation_timeout(request_timeout * 1000)
     
     return context
 

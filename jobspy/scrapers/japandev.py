@@ -28,6 +28,7 @@ from jobspy.scrapers.utils import (
     managed_playwright_context,
     setup_page,
     parse_proxy_string,
+    remaining_timeout_ms,
 )
 
 try:
@@ -208,8 +209,8 @@ class JapanDev(Scraper):
         # Not selected, click to select it
         for attempt in range(3):
             try:
-                loc.scroll_into_view_if_needed()
-                loc.click(force=(attempt > 0), no_wait_after=True)
+                loc.scroll_into_view_if_needed(timeout=2000)
+                loc.click(force=(attempt > 0), no_wait_after=True, timeout=2000)
                 
                 # Verify it's now selected
                 expect(loc).to_have_class(selected_re, timeout=2000)
@@ -239,6 +240,7 @@ class JapanDev(Scraper):
         page,
         scraper_input: ScraperInput,
         *,
+        deadline: float | None = None,
         applicant_locations: Optional[Sequence[JdApplicantLocation | str]] = None,
         japanese_levels: Optional[Sequence[JdJapaneseLevel | str]] = None,
         english_levels: Optional[Sequence[JdEnglishLevel | str]] = None,
@@ -283,12 +285,16 @@ class JapanDev(Scraper):
             if not group:
                 continue
             for opt in group:
+                if deadline is not None and remaining_timeout_ms(deadline) <= 0:
+                    return
                 # Convert string to enum if needed
                 enum_opt = self._convert_to_enum(opt, enum_class) if isinstance(opt, str) else opt
                 self._click_filter(page, enum_opt)
 
         if raw_filters:
             for rf in raw_filters:
+                if deadline is not None and remaining_timeout_ms(deadline) <= 0:
+                    return
                 self._click_filter(page, rf)
 
         # If caller just says "remote", apply all remote-ish options (excluding "No Remote")
@@ -299,14 +305,12 @@ class JapanDev(Scraper):
                 JdRemoteWork.ANYWHERE_IN_JAPAN,
                 JdRemoteWork.WORLDWIDE,
             ):
+                if deadline is not None and remaining_timeout_ms(deadline) <= 0:
+                    return
                 self._click_filter(page, opt)
 
-        # Once all filters are applied, we wait for network idle settlement.
-        try:
-            # Wait for all filter requests to complete (networkidle)
-            page.wait_for_load_state("networkidle", timeout=scraper_input.request_timeout * 1000)
-        except Exception:
-            pass
+        # Job-card readiness is verified by the caller. The site keeps background
+        # activity open, so waiting for network-idle would consume the whole budget.
 
     def scrape(
         self,
@@ -334,6 +338,7 @@ class JapanDev(Scraper):
                 proxy_str = self.proxies
 
         proxy = parse_proxy_string(proxy_str) if proxy_str else None
+        deadline = time.monotonic() + max(scraper_input.request_timeout, 1)
 
         with managed_playwright_context(
                 proxy=proxy,
@@ -342,11 +347,23 @@ class JapanDev(Scraper):
         ) as context:
 
             page = setup_page(context, block_resources=True)
+            page_timeout_ms = remaining_timeout_ms(deadline)
+            if page_timeout_ms <= 0:
+                return JobResponse(jobs=[])
+            page.set_default_timeout(page_timeout_ms)
+            page.set_default_navigation_timeout(page_timeout_ms)
 
             logger.info(f"Scraping JapanDev at {self.base_url}")
             try:
-                page.goto(self.base_url)
-                page.wait_for_selector(".filters", timeout=scraper_input.request_timeout * 1000)
+                page.goto(
+                    self.base_url,
+                    timeout=page_timeout_ms,
+                    wait_until="domcontentloaded",
+                )
+                page_timeout_ms = remaining_timeout_ms(deadline)
+                if page_timeout_ms <= 0:
+                    return JobResponse(jobs=[])
+                page.wait_for_selector(".filters", timeout=page_timeout_ms)
             except Exception as e:
                 logger.error(f"Failed to load JapanDev listing page: {e}")
                 return JobResponse(jobs=[])
@@ -355,6 +372,7 @@ class JapanDev(Scraper):
             self._apply_filters(
                 page,
                 scraper_input,
+                deadline=deadline,
                 applicant_locations=applicant_locations,
                 japanese_levels=japanese_levels,
                 english_levels=english_levels,
@@ -368,8 +386,11 @@ class JapanDev(Scraper):
                 raw_filters=raw_filters,
             )
 
-            # Wait for network idle after sending filter update request so it is reflected in the UI
-            page.wait_for_load_state("networkidle", timeout=scraper_input.request_timeout * 1000)
+            # Let the job-card selector below confirm the filtered results. Some pages keep
+            # analytics connections open indefinitely, so network-idle is not a hard gate.
+            page_timeout_ms = remaining_timeout_ms(deadline)
+            if page_timeout_ms <= 0:
+                return JobResponse(jobs=[])
 
             # Get listing cards
             job_cards = []
@@ -384,6 +405,11 @@ class JapanDev(Scraper):
 
             for card in job_cards:
                 if len(job_list) >= scraper_input.results_wanted:
+                    break
+
+                detail_timeout_ms = remaining_timeout_ms(deadline)
+                if detail_timeout_ms <= 0:
+                    logger.info("JapanDev scrape reached its request timeout with %s jobs", len(job_list))
                     break
 
                 try:
@@ -408,21 +434,27 @@ class JapanDev(Scraper):
 
                     detail_page = setup_page(context, block_resources=True)
                     try:
-                        detail_page.goto(job_url)
+                        detail_page.set_default_timeout(detail_timeout_ms)
+                        detail_page.set_default_navigation_timeout(detail_timeout_ms)
+                        detail_page.goto(
+                            job_url,
+                            timeout=detail_timeout_ms,
+                            wait_until="domcontentloaded",
+                        )
+                        detail_timeout_ms = remaining_timeout_ms(deadline)
+                        if detail_timeout_ms <= 0:
+                            break
+                        detail_page.set_default_timeout(detail_timeout_ms)
                         detail = self._extract_detail_fields(detail_page, scraper_input)
                     except Exception as e:
                         logger.warning(f"Failed to extract details for {job_url}: {e}")
-                        detail = {
-                            "title": title,
-                            "company_name": company_name,
-                            "location_text": "Japan",
-                            "salary_text": None,
-                            "job_url_direct": None,
-                            "description": None,
-                            "date_posted": date.today(),
-                        }
+                        continue
                     finally:
                         detail_page.close()
+
+                    if not str(detail.get("description") or "").strip():
+                        logger.warning("Skipping JapanDev job without a description: %s", job_url)
+                        continue
 
                     final_title = detail["title"] or title
                     final_company = detail["company_name"] or company_name

@@ -33,6 +33,21 @@ class BrowserRuntimeTestCase(unittest.TestCase):
         _, kwargs = launch.call_args
         self.assertNotIn("channel", kwargs)
 
+    def test_remaining_timeout_ms_never_returns_a_negative_budget(self) -> None:
+        with patch("jobspy.scrapers.utils.time.monotonic", return_value=100.0):
+            self.assertEqual(utils.remaining_timeout_ms(101.25), 1250)
+            self.assertEqual(utils.remaining_timeout_ms(99.0), 0)
+
+    def test_context_applies_the_navigation_timeout(self) -> None:
+        browser = Mock()
+        context = Mock()
+        browser.new_context.return_value = context
+
+        utils.create_playwright_context(browser, request_timeout=45)
+
+        context.set_default_timeout.assert_called_once_with(45000)
+        context.set_default_navigation_timeout.assert_called_once_with(45000)
+
     def test_managed_context_closes_context_and_browser(self) -> None:
         context = Mock()
         browser = Mock()

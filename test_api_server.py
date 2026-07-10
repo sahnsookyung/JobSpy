@@ -2,6 +2,7 @@
 
 import os
 import threading
+import time
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -98,6 +99,26 @@ class ApiServerTestCase(unittest.TestCase):
         self.assertEqual(task["status"], "failed")
         self.assertIn("site unavailable", task["error"])
         self.assertNotIn("_updated_at", task)
+
+    def test_scraper_task_times_out_and_releases_the_slot(self) -> None:
+        class HangingScraper:
+            def scrape(self, _request, **_options):
+                time.sleep(10)
+
+        request = api_server.ScrapeRequest(
+            site_type=["tokyodev"],
+            results_wanted=1,
+            request_timeout=1,
+        )
+        api_server.SCRAPE_SEMAPHORE.acquire()
+        with patch.dict(api_server.SCRAPER_MAPPING, {api_server.Site.TOKYODEV: HangingScraper}):
+            api_server.run_scraper_task("task-timeout", request)
+
+        task = api_server._public_task(api_server.JOB_STORE["task-timeout"])
+        self.assertEqual(task["status"], "failed")
+        self.assertIn("exceeded request timeout of 1 seconds", task["error"])
+        self.assertTrue(api_server.SCRAPE_SEMAPHORE.acquire(blocking=False))
+        api_server.SCRAPE_SEMAPHORE.release()
 
     def test_expired_tasks_are_removed(self) -> None:
         previous_ttl = api_server.TASK_TTL_SECONDS

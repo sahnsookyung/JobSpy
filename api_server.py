@@ -2,7 +2,10 @@
 
 import hmac
 import logging
+import multiprocessing
 import os
+import queue
+import signal
 import threading
 import time
 import uuid
@@ -183,26 +186,114 @@ class ScrapeRequest(ScraperInput):
         return self
 
 
-def run_scraper_task(task_id: str, request: ScrapeRequest) -> None:
-    """Run one scraper and always release the slot reserved by the API route."""
-    site = request.site_type[0]
+def _run_scraper_worker(
+    site: Site,
+    request: ScrapeRequest,
+    result_queue: Any,
+) -> None:
+    """Run the browser in its own process so a hung scraper can be terminated safely."""
+    if os.name == "posix":
+        os.setsid()
+
     try:
-        logger.info("Task %s: starting scrape for %s", task_id, site.value)
         scraper_class = SCRAPER_MAPPING[site]
         scraper = scraper_class()
         results = scraper.scrape(request, **request.options)
         jobs_data = [job.model_dump() for job in results.jobs]
-        _store_task(
-            task_id,
-            status="completed",
-            count=len(jobs_data),
-            data=jobs_data,
-        )
-        logger.info("Task %s: completed with %s jobs", task_id, len(jobs_data))
+        result_queue.put({"status": "completed", "data": jobs_data})
     except Exception as exc:
-        logger.exception("Task %s: scrape failed", task_id)
+        logger.exception("Scrape worker failed for %s", site.value)
+        result_queue.put({"status": "failed", "error": str(exc)})
+
+
+def _terminate_scraper_worker(process: multiprocessing.Process) -> None:
+    """Terminate the worker and its browser subprocesses after a request timeout."""
+    if not process.is_alive():
+        return
+
+    try:
+        if os.name == "posix" and process.pid is not None:
+            os.killpg(process.pid, signal.SIGTERM)
+        else:
+            process.terminate()
+    except ProcessLookupError:
+        return
+
+    process.join(timeout=2)
+    if not process.is_alive():
+        return
+
+    try:
+        if os.name == "posix" and process.pid is not None:
+            os.killpg(process.pid, signal.SIGKILL)
+        else:
+            process.kill()
+    except ProcessLookupError:
+        return
+    process.join(timeout=2)
+
+
+def _scraper_process_context() -> multiprocessing.context.BaseContext:
+    """Use fork on supported hosts so scraper models do not need to be serialized."""
+    if "fork" in multiprocessing.get_all_start_methods():
+        return multiprocessing.get_context("fork")
+    return multiprocessing.get_context()
+
+
+def run_scraper_task(task_id: str, request: ScrapeRequest) -> None:
+    """Run one bounded scraper and always release its reserved concurrency slot."""
+    site = request.site_type[0]
+    timeout_seconds = max(int(request.request_timeout or 1), 1)
+    context = _scraper_process_context()
+    result_queue = context.Queue(maxsize=1)
+    process = context.Process(
+        target=_run_scraper_worker,
+        args=(site, request, result_queue),
+        daemon=True,
+    )
+
+    try:
+        logger.info("Task %s: starting scrape for %s", task_id, site.value)
+        process.start()
+        try:
+            result = result_queue.get(timeout=timeout_seconds)
+        except queue.Empty:
+            timed_out = process.is_alive()
+            _terminate_scraper_worker(process)
+            error = (
+                f"scrape exceeded request timeout of {timeout_seconds} seconds"
+                if timed_out
+                else "scrape worker exited without returning a result"
+            )
+            _store_task(task_id, status="failed", error=error)
+            logger.error("Task %s: %s", task_id, error)
+            return
+
+        process.join(timeout=2)
+        if process.is_alive():
+            _terminate_scraper_worker(process)
+
+        if result.get("status") == "completed":
+            jobs_data = result.get("data") or []
+            _store_task(
+                task_id,
+                status="completed",
+                count=len(jobs_data),
+                data=jobs_data,
+            )
+            logger.info("Task %s: completed with %s jobs", task_id, len(jobs_data))
+            return
+
+        error = str(result.get("error") or "scrape worker failed without an error message")
+        _store_task(task_id, status="failed", error=error)
+        logger.error("Task %s: scrape failed: %s", task_id, error)
+    except Exception as exc:
+        logger.exception("Task %s: scraper process failed", task_id)
         _store_task(task_id, status="failed", error=str(exc))
     finally:
+        _terminate_scraper_worker(process)
+        result_queue.close()
+        result_queue.join_thread()
         SCRAPE_SEMAPHORE.release()
 
 

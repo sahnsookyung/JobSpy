@@ -8,6 +8,8 @@ from datetime import date
 from typing import Optional, List, Tuple
 from urllib.parse import urljoin, urlencode
 
+from bs4 import BeautifulSoup
+
 from jobspy.model import (
     Scraper,
     ScraperInput,
@@ -25,6 +27,7 @@ from jobspy.scrapers.utils import (
     managed_playwright_context,
     setup_page,
     parse_proxy_string,
+    remaining_timeout_ms,
     wait_for_cloudflare_to_clear,
 )
 
@@ -143,45 +146,49 @@ class TokyoDev(Scraper):
 
 
     def _extract_seeds_from_list_page(self, page, results_wanted: int) -> list[JobSeed]:
-        """
-        Extract (job_url, company_name, skills/tags) from the aggregation page.
-        """
+        """Extract list-page seeds from one DOM snapshot within the request budget."""
         seeds: list[JobSeed] = []
-        company_cards = page.locator("ul.list-inside > li").all()
+        try:
+            list_html = page.locator("ul.list-inside").inner_html()
+        except Exception as exc:
+            logger.warning("Unable to read TokyoDev listing markup: %s", exc)
+            return seeds
+
+        soup = BeautifulSoup(list_html, "html.parser")
+        company_cards = soup.find_all("li", recursive=False)
 
         for card in company_cards:
             if len(seeds) >= results_wanted:
                 break
 
-            try:
-                company_name = card.locator("h3 a").first.inner_text().strip()
-            except Exception:
-                company_name = None
+            company_anchor = card.select_one("h3 a")
+            company_name = company_anchor.get_text(" ", strip=True) if company_anchor else None
 
-            # Each job row is a div[data-collapsable-list-target='item'] containing h4 a.
-            job_items = card.locator("div[data-collapsable-list-target='item']").all()
+            # TokyoDev currently renders titles in a styled div; older pages used h4.
+            job_items = card.find_all(
+                "div", attrs={"data-collapsable-list-target": "item"}
+            )
 
             for item in job_items:
                 if len(seeds) >= results_wanted:
                     break
 
                 try:
-                    title_link = item.locator("h4 a").first
-                    href = title_link.get_attribute("href")
+                    title_link = item.select_one("div.text-lg.font-bold > a, h4 a")
+                    href = title_link.get("href") if title_link else None
                     if not href:
                         continue
                     job_url = urljoin(self.base_url, href)
 
-                    tag_links = item.locator("div.flex.gap-2 a").all()
                     tag_texts: list[str] = []
                     salary_text_hint: str | None = None
                     is_remote_hint = False
                     skills: list[str] = []
 
-                    for a in tag_links:
-                        t = (a.inner_text() or "").strip()
+                    for a in item.select("div.flex.gap-2 a"):
+                        t = a.get_text(" ", strip=True)
                         tag_texts.append(t)
-                        href2 = a.get_attribute("href") or ""
+                        href2 = a.get("href") or ""
                         lt = t.lower()
 
                         # Salary tag commonly links to /jobs/salary-data.
@@ -325,6 +332,7 @@ class TokyoDev(Scraper):
             elif isinstance(self.proxies, str):
                 proxy_str = self.proxies
         proxy = parse_proxy_string(proxy_str) if proxy_str else None
+        deadline = time.monotonic() + max(scraper_input.request_timeout, 1)
 
         with managed_playwright_context(
                 proxy=proxy,
@@ -334,6 +342,11 @@ class TokyoDev(Scraper):
 
             # Safer vs Cloudflare: do NOT block fonts/stylesheets; your utils only blocks images/media anyway.
             list_page = setup_page(context, block_resources=False)
+            list_timeout_ms = remaining_timeout_ms(deadline)
+            if list_timeout_ms <= 0:
+                return JobResponse(jobs=[])
+            list_page.set_default_timeout(list_timeout_ms)
+            list_page.set_default_navigation_timeout(list_timeout_ms)
 
             url = self._build_jobs_url(
                 scraper_input,
@@ -348,9 +361,15 @@ class TokyoDev(Scraper):
             logger.info(f"Scraping TokyoDev at {url}")
 
             try:
-                list_page.goto(url)
-                wait_for_cloudflare_to_clear(list_page, timeout_ms=scraper_input.request_timeout * 1000)
-                list_page.wait_for_selector("ul.list-inside", timeout=scraper_input.request_timeout * 1000)
+                list_page.goto(url, timeout=list_timeout_ms, wait_until="domcontentloaded")
+                list_timeout_ms = remaining_timeout_ms(deadline)
+                if list_timeout_ms <= 0:
+                    return JobResponse(jobs=[])
+                wait_for_cloudflare_to_clear(list_page, timeout_ms=list_timeout_ms)
+                list_timeout_ms = remaining_timeout_ms(deadline)
+                if list_timeout_ms <= 0:
+                    return JobResponse(jobs=[])
+                list_page.wait_for_selector("ul.list-inside", timeout=list_timeout_ms)
             except Exception as e:
                 logger.error(f"Failed to load TokyoDev listing page: {e}")
                 return JobResponse(jobs=[])
@@ -361,10 +380,29 @@ class TokyoDev(Scraper):
                 if len(job_list) >= scraper_input.results_wanted:
                     break
 
+                detail_timeout_ms = remaining_timeout_ms(deadline)
+                if detail_timeout_ms <= 0:
+                    logger.info("TokyoDev scrape reached its request timeout with %s jobs", len(job_list))
+                    break
+
                 detail_page = setup_page(context, block_resources=False)
                 try:
-                    detail_page.goto(seed.job_url)
-                    wait_for_cloudflare_to_clear(detail_page, timeout_ms=scraper_input.request_timeout * 1000)
+                    detail_page.set_default_timeout(detail_timeout_ms)
+                    detail_page.set_default_navigation_timeout(detail_timeout_ms)
+                    detail_page.goto(
+                        seed.job_url,
+                        timeout=detail_timeout_ms,
+                        wait_until="domcontentloaded",
+                    )
+                    detail_timeout_ms = remaining_timeout_ms(deadline)
+                    if detail_timeout_ms <= 0:
+                        break
+                    detail_page.set_default_timeout(detail_timeout_ms)
+                    wait_for_cloudflare_to_clear(detail_page, timeout_ms=detail_timeout_ms)
+                    detail_timeout_ms = remaining_timeout_ms(deadline)
+                    if detail_timeout_ms <= 0:
+                        break
+                    detail_page.set_default_timeout(detail_timeout_ms)
 
                     try:
                         title = detail_page.locator("h1").first.inner_text().strip()
