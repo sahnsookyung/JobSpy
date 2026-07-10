@@ -65,6 +65,13 @@ except Exception:
 logger = logging.getLogger(__name__)
 
 
+# Leave enough of the API request budget for the scraper worker to serialize
+# results, close Playwright resources, and hand the result back to its parent.
+# Without this reserve the parent can terminate an otherwise valid partial
+# scrape exactly at the configured request timeout.
+REQUEST_COMPLETION_BUFFER_SECONDS = 5
+
+
 @dataclass(frozen=True)
 class _RawFilter:
     """
@@ -312,6 +319,16 @@ class JapanDev(Scraper):
         # Job-card readiness is verified by the caller. The site keeps background
         # activity open, so waiting for network-idle would consume the whole budget.
 
+    @staticmethod
+    def _request_deadline(request_timeout: int) -> float:
+        """Return a browser deadline that leaves time for worker cleanup."""
+        timeout_seconds = max(int(request_timeout), 1)
+        completion_buffer = min(
+            REQUEST_COMPLETION_BUFFER_SECONDS,
+            max(timeout_seconds - 1, 0),
+        )
+        return time.monotonic() + timeout_seconds - completion_buffer
+
     def scrape(
         self,
         scraper_input: ScraperInput,
@@ -338,7 +355,7 @@ class JapanDev(Scraper):
                 proxy_str = self.proxies
 
         proxy = parse_proxy_string(proxy_str) if proxy_str else None
-        deadline = time.monotonic() + max(scraper_input.request_timeout, 1)
+        deadline = self._request_deadline(scraper_input.request_timeout)
 
         with managed_playwright_context(
                 proxy=proxy,

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from jobspy.scrapers.japandev import JapanDev
+from jobspy.scrapers.japandev import REQUEST_COMPLETION_BUFFER_SECONDS, JapanDev
 
 
 class _FilterOption:
@@ -9,6 +9,18 @@ class _FilterOption:
 
 
 class JapanDevScraperTestCase(unittest.TestCase):
+    def test_request_deadline_reserves_worker_cleanup_time(self) -> None:
+        with patch("jobspy.scrapers.japandev.time.monotonic", return_value=100.0):
+            deadline = JapanDev._request_deadline(45)
+
+        self.assertEqual(deadline, 100.0 + 45 - REQUEST_COMPLETION_BUFFER_SECONDS)
+
+    def test_short_request_deadline_keeps_at_least_one_second_for_scraping(self) -> None:
+        with patch("jobspy.scrapers.japandev.time.monotonic", return_value=100.0):
+            deadline = JapanDev._request_deadline(1)
+
+        self.assertEqual(deadline, 101.0)
+
     def test_filter_clicks_are_individually_time_bounded(self) -> None:
         locator = Mock()
         locator.get_attribute.return_value = ""
