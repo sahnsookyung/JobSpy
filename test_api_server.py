@@ -40,6 +40,14 @@ class ApiServerTestCase(unittest.TestCase):
         with self.assertRaises(ValidationError):
             api_server.ScrapeRequest(site_type=["tokyodev"], results_wanted=26)
 
+    def test_request_rejects_unknown_fields(self) -> None:
+        with self.assertRaises(ValidationError):
+            api_server.ScrapeRequest(
+                site_type=["tokyodev"],
+                results_wanted=1,
+                display_name="UI-only source metadata",
+            )
+
     def test_authentication_requires_matching_token(self) -> None:
         with self.assertRaises(HTTPException) as missing:
             api_server._require_api_token(None)

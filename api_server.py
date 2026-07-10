@@ -9,7 +9,7 @@ import uuid
 from typing import Any, Optional
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, status
-from pydantic import Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from jobspy.model import Country, DescriptionFormat, JobType, ScraperInput, Site
 from jobspy.scrapers.japandev import JapanDev
@@ -106,6 +106,8 @@ def _acquire_scrape_slot() -> None:
 
 class ScrapeRequest(ScraperInput):
     """One bounded scrape request for a configured JobScout source."""
+
+    model_config = ConfigDict(extra="forbid")
 
     options: dict[str, Any] = Field(
         default_factory=dict,
