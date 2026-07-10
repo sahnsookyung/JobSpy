@@ -11,8 +11,6 @@ from playwright.sync_api import Browser, BrowserContext, Page, sync_playwright
 logger = logging.getLogger(__name__)
 
 _CONSTRAINED_RUNTIME_BROWSER_ARGS = (
-    "--disable-gpu",
-    "--disable-software-rasterizer",
     "--disable-extensions",
     "--disable-background-networking",
     "--no-first-run",
