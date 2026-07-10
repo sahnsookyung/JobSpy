@@ -18,6 +18,8 @@ class BrowserRuntimeTestCase(unittest.TestCase):
         _, kwargs = launch.call_args
         self.assertEqual(kwargs["channel"], "chrome")
         self.assertTrue(kwargs["headless"])
+        self.assertIn("--use-gl=angle", kwargs["args"])
+        self.assertIn("--use-angle=swiftshader", kwargs["args"])
         self.assertIn("--disable-extensions", kwargs["args"])
 
     def test_bundled_chromium_omits_channel(self) -> None:
