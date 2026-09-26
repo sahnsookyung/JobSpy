@@ -1,18 +1,21 @@
 """Bounded, authenticated internal API for the custom JobSpy scrapers."""
 
 import hmac
+import json
 import logging
 import multiprocessing
 import os
-import queue
 import signal
+import tempfile
 import threading
 import time
 import uuid
+from contextlib import ExitStack
 from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, status
+from fastapi.encoders import jsonable_encoder
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from jobspy.model import Country, DescriptionFormat, JobType, ScraperInput, Site
@@ -23,6 +26,7 @@ from jobspy.scrapers.tokyodev import TokyoDev
 DEFAULT_ALLOWED_SITES = frozenset({"tokyodev", "japandev"})
 DEFAULT_MAX_RESULTS = 25
 DEFAULT_TASK_TTL_SECONDS = 3600
+MAX_RESULT_BYTES = 16 * 1024 * 1024
 
 SCRAPER_MAPPING = {
     Site.TOKYODEV: TokyoDev,
@@ -196,7 +200,7 @@ class ScrapeRequest(ScraperInput):
 def _run_scraper_worker(
     site: Site,
     request: ScrapeRequest,
-    result_queue: Any,
+    result_path: str,
     started: Any,
 ) -> None:
     """Run the browser in its own process so a hung scraper can be terminated safely."""
@@ -212,10 +216,13 @@ def _run_scraper_worker(
         scraper = scraper_class()
         results = scraper.scrape(request, **request.options)
         jobs_data = [job.model_dump() for job in results.jobs]
-        result_queue.put({"status": "completed", "data": jobs_data})
+        encoded = json.dumps(jsonable_encoder({"status": "completed", "data": jobs_data})).encode()
+        if len(encoded) > MAX_RESULT_BYTES:
+            raise ValueError("scrape result exceeds the bounded response size")
+        Path(result_path).write_bytes(encoded)
     except Exception as exc:
         logger.exception("Scrape worker failed for %s", site.value)
-        result_queue.put({"status": "failed", "error": str(exc)})
+        Path(result_path).write_text(json.dumps({"status": "failed", "error": str(exc)[:2000]}))
 
 
 def _process_group_exists(process_group_id: Optional[int]) -> bool:
@@ -301,20 +308,22 @@ def run_scraper_task(task_id: str, request: ScrapeRequest) -> None:
     site = request.site_type[0]
     timeout_seconds = max(int(request.request_timeout or 1), 1)
     deadline = time.monotonic() + timeout_seconds
-    result_queue = started_reader = started_writer = process = None
+    result_storage = ExitStack()
+    started_reader = started_writer = process = None
     try:
         context = _scraper_process_context()
         browser_baseline = _browser_processes()
-        result_queue = context.Queue(maxsize=1)
+        result_directory = result_storage.enter_context(tempfile.TemporaryDirectory(prefix="jobspy-"))
+        result_path = str(Path(result_directory) / "result.json")
         started_reader, started_writer = context.Pipe(duplex=False)
         process = context.Process(
             target=_run_scraper_worker,
-            args=(site, request, result_queue, started_writer),
+            args=(site, request, result_path, started_writer),
             daemon=True,
         )
     except Exception:
         CLEANUP_FAILED.set()
-        _close_scraper_resources(started_reader, started_writer, result_queue, process)
+        _close_scraper_resources(started_reader, started_writer, process, result_storage)
         _store_task(task_id, status="failed", error="cannot allocate scraper resources", error_code="cleanup_failed")
         logger.exception("Task %s: cannot allocate scraper resources", task_id)
         return
@@ -330,11 +339,19 @@ def run_scraper_task(task_id: str, request: ScrapeRequest) -> None:
         if os.name == "posix" and process_group_id != process.pid:
             process_group_id = None
             raise RuntimeError("scrape worker reported invalid process ownership")
-        result = result_queue.get(timeout=max(0, deadline - time.monotonic()))
-        # The scraper's context manager has already closed Playwright before it
-        # sends a result. Give the queue feeder/worker a bounded chance to exit.
-        process.join(timeout=max(0, min(2, deadline - time.monotonic())))
-    except queue.Empty:
+        # A Queue timeout does not bound reading a partially written IPC frame.
+        # Wait for worker exit, then read a size-limited file from its private
+        # temporary directory. A crash midway through writing cannot block us.
+        process.join(timeout=max(0, deadline - time.monotonic()))
+        if process.is_alive():
+            raise TimeoutError("scrape worker exceeded its deadline")
+        if process.exitcode == 0:
+            with open(result_path, "rb") as result_file:
+                encoded = result_file.read(MAX_RESULT_BYTES + 1)
+            if len(encoded) > MAX_RESULT_BYTES:
+                raise ValueError("scrape result exceeds the bounded response size")
+            result = json.loads(encoded)
+    except TimeoutError:
         result = {"status": "failed", "error": f"scrape exceeded request timeout of {timeout_seconds} seconds", "error_code": "scrape_timeout"}
     except Exception as exc:
         logger.exception("Task %s: scraper process failed", task_id)
@@ -351,8 +368,7 @@ def run_scraper_task(task_id: str, request: ScrapeRequest) -> None:
         except Exception:
             logger.exception("Task %s: cannot verify browser cleanup", task_id)
             cleaned = False
-        handles_closed = _close_scraper_resources(started_reader, started_writer, result_queue)
-        # The parent never writes to this queue, so it has no feeder to join.
+        handles_closed = _close_scraper_resources(started_reader, started_writer, result_storage)
         # Collect the exit code before closing multiprocessing's sentinel. Even
         # failed descendant verification must not leak a finished worker handle.
         exit_code = process.exitcode
