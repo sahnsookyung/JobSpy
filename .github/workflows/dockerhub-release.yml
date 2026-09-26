@@ -1,66 +1,73 @@
-name: Publish Docker image to Docker Hub
+name: Validate and publish JobSpy image
 
 on:
+  pull_request:
+    branches: [main]
   push:
-    tags:
-      - "v*"
+    tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write
 
-env:
-  IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}/jobspy
+concurrency:
+  group: jobspy-image-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-
+  verify-and-publish:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 35
+    env:
+      IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}/jobspy
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build date
-        id: builddate
-        run: echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
-
-      - name: Docker metadata (tags, labels)
-        id: meta
-        uses: docker/metadata-action@v5
+          persist-credentials: false
+      - name: Build native ARM64 image
+        run: docker build -f Dockerfile.arm64 --label "org.opencontainers.image.revision=$GITHUB_SHA" -t jobspy-verified:test .
+      - name: Run API and scraper regressions
+        run: |
+          docker run --rm --init --pids-limit 512 --memory 2g --cpus 1.5 \
+            jobspy-verified:test python -m unittest \
+            test_api_server test_browser_runtime test_tokyodev_scraper test_japandev_scraper test_process_cleanup -v
+      - name: Run 50 real Chromium cleanup cycles
+        run: |
+          docker run --rm --init --pids-limit 512 --memory 2g --cpus 1.5 \
+            --shm-size 1g --tmpfs /tmp:size=256m -e PYTHONPATH=/app \
+            jobspy-verified:test python tests/browser_cleanup_stress.py
+      - name: Install verified Grype scanner
+        run: |
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsSLo grype.tar.gz \
+            https://github.com/anchore/grype/releases/download/v0.119.0/grype_0.119.0_linux_arm64.tar.gz
+          echo '29f0ec7c549ddb0e2b6a0ca714851f7399438afc399b80c12808e065edc9a8f8  grype.tar.gz' | sha256sum -c
+          tar -xzf grype.tar.gz grype
+          sudo install -m 0755 grype /usr/local/bin/grype
+      - name: Block high and critical vulnerabilities
+        run: |
+          grype docker:jobspy-verified:test --fail-on high --output json --file grype.json
+          docker run --rm --init jobspy-verified:test python tests/browser_inventory.py > browser.cdx.json
+          grype sbom:browser.cdx.json --fail-on high --output json --file browser-grype.json
+      - name: Retain vulnerability scan evidence
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
-          images: ${{ env.IMAGE_NAME }}
-          # Only tag "latest" for stable tags (no hyphen like -rc1)
-          flavor: |
-            latest=${{ !contains(github.ref_name, '-') }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          # Native ARM64 Chromium passed the OCI TokyoDev/JapanDev acceptance probe.
-          file: Dockerfile.arm64
-          platforms: linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          # Optional, but good for public images:
-          provenance: mode=max
-          sbom: true
-          # Your Dockerfile consumes these ARGs:
-          build-args: |
-            VERSION=${{ github.ref_name }}
-            GIT_COMMIT=${{ github.sha }}
-            BUILD_DATE=${{ steps.builddate.outputs.date }}
+          name: jobspy-arm64-security
+          path: |
+            grype.json
+            browser.cdx.json
+            browser-grype.json
+          retention-days: 30
+      - name: Publish only the verified image
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+        run: |
+          printf '%s' "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          tag="${GITHUB_REF_NAME#v}"
+          docker tag jobspy-verified:test "$IMAGE_NAME:$tag"
+          docker push "$IMAGE_NAME:$tag"
+          digest="$(docker inspect --format '{{index .RepoDigests 0}}' "$IMAGE_NAME:$tag")"
+          printf 'Verified ARM64 image: %s\n' "$digest" >> "$GITHUB_STEP_SUMMARY"

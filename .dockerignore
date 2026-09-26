@@ -12,4 +12,7 @@ api_responses.json
 jobs.csv
 misc/
 test_api.py
-test_api_server.py
+.gitnexus
+.claude
+AGENTS.md
+CLAUDE.md

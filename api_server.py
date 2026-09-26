@@ -9,6 +9,7 @@ import signal
 import threading
 import time
 import uuid
+from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, status
@@ -33,6 +34,7 @@ logger = logging.getLogger("api_server")
 app = FastAPI(title="JobScout JobSpy Scraper API")
 JOB_STORE: dict[str, dict[str, Any]] = {}
 JOB_STORE_LOCK = threading.Lock()
+CLEANUP_FAILED = threading.Event()
 
 
 def _positive_int_env(name: str, default: int) -> int:
@@ -100,6 +102,11 @@ def _require_api_token(
 
 
 def _acquire_scrape_slot() -> None:
+    if CLEANUP_FAILED.is_set():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="JobSpy is unready: browser cleanup failed",
+        )
     if not SCRAPE_SEMAPHORE.acquire(blocking=False):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -190,10 +197,15 @@ def _run_scraper_worker(
     site: Site,
     request: ScrapeRequest,
     result_queue: Any,
+    started: Any,
 ) -> None:
     """Run the browser in its own process so a hung scraper can be terminated safely."""
     if os.name == "posix":
         os.setsid()
+    # Acknowledge ownership before launching any browser. The parent must never
+    # signal an inferred process group while the child still shares its group.
+    started.send(os.getpgrp() if os.name == "posix" else None)
+    started.close()
 
     try:
         scraper_class = SCRAPER_MAPPING[site]
@@ -206,31 +218,62 @@ def _run_scraper_worker(
         result_queue.put({"status": "failed", "error": str(exc)})
 
 
-def _terminate_scraper_worker(process: multiprocessing.Process) -> None:
-    """Terminate the worker and its browser subprocesses after a request timeout."""
-    if not process.is_alive():
-        return
-
+def _process_group_exists(process_group_id: Optional[int]) -> bool:
+    if process_group_id is None:
+        return False
     try:
-        if os.name == "posix" and process.pid is not None:
-            os.killpg(process.pid, signal.SIGTERM)
-        else:
-            process.terminate()
+        os.killpg(process_group_id, 0)
     except ProcessLookupError:
-        return
+        return False
+    return True
 
-    process.join(timeout=2)
-    if not process.is_alive():
-        return
 
-    try:
-        if os.name == "posix" and process.pid is not None:
-            os.killpg(process.pid, signal.SIGKILL)
-        else:
-            process.kill()
-    except ProcessLookupError:
-        return
-    process.join(timeout=2)
+def _browser_processes() -> set[tuple[int, str]]:
+    """Identify browser descendants which escaped the worker's process group.
+
+    Identity includes start time to avoid confusing recycled PIDs. These are
+    verification only: we never kill processes based on their executable name.
+    """
+    processes = set()
+    for entry in Path("/proc").glob("[0-9]*/stat"):
+        try:
+            raw = entry.read_text()
+            name = raw[raw.index("(") + 1:raw.rindex(")")]
+            fields = raw[raw.rindex(")") + 2:].split()
+            if name in {"headless_shell", "chrome", "chromium", "chrome_crashpad", "node"}:
+                processes.add((int(entry.parent.name), fields[19]))
+        except (FileNotFoundError, ProcessLookupError):
+            continue
+    return processes
+
+
+def _terminate_scraper_worker(
+    process: multiprocessing.Process,
+    process_group_id: Optional[int] = None,
+) -> bool:
+    """Collect the worker and stop its group, even after the group leader exits."""
+    if process.pid is None:
+        return True
+    for termination_signal in (signal.SIGTERM, signal.SIGKILL):
+        try:
+            if process_group_id is not None:
+                os.killpg(process_group_id, termination_signal)
+            elif process.is_alive():
+                if termination_signal == signal.SIGTERM:
+                    process.terminate()
+                else:
+                    process.kill()
+        except ProcessLookupError:
+            pass
+        deadline = time.monotonic() + 2
+        while True:
+            process.join(timeout=0)
+            if not process.is_alive() and not _process_group_exists(process_group_id):
+                return True
+            if time.monotonic() >= deadline:
+                break
+            time.sleep(0.05)
+    return False
 
 
 def _scraper_process_context() -> multiprocessing.context.BaseContext:
@@ -240,61 +283,96 @@ def _scraper_process_context() -> multiprocessing.context.BaseContext:
     return multiprocessing.get_context()
 
 
+def _close_scraper_resources(*resources: Any) -> bool:
+    """Attempt every close, even when an earlier multiprocessing handle fails."""
+    closed = True
+    for resource in resources:
+        if resource is not None:
+            try:
+                resource.close()
+            except Exception:
+                closed = False
+                logger.exception("Cannot close scraper resource")
+    return closed
+
+
 def run_scraper_task(task_id: str, request: ScrapeRequest) -> None:
-    """Run one bounded scraper and always release its reserved concurrency slot."""
+    """Release capacity only after the worker and browser group are gone."""
     site = request.site_type[0]
     timeout_seconds = max(int(request.request_timeout or 1), 1)
-    context = _scraper_process_context()
-    result_queue = context.Queue(maxsize=1)
-    process = context.Process(
-        target=_run_scraper_worker,
-        args=(site, request, result_queue),
-        daemon=True,
-    )
-
+    deadline = time.monotonic() + timeout_seconds
+    result_queue = started_reader = started_writer = process = None
+    try:
+        context = _scraper_process_context()
+        browser_baseline = _browser_processes()
+        result_queue = context.Queue(maxsize=1)
+        started_reader, started_writer = context.Pipe(duplex=False)
+        process = context.Process(
+            target=_run_scraper_worker,
+            args=(site, request, result_queue, started_writer),
+            daemon=True,
+        )
+    except Exception:
+        CLEANUP_FAILED.set()
+        _close_scraper_resources(started_reader, started_writer, result_queue, process)
+        _store_task(task_id, status="failed", error="cannot allocate scraper resources", error_code="cleanup_failed")
+        logger.exception("Task %s: cannot allocate scraper resources", task_id)
+        return
+    process_group_id = None
+    result = {"status": "failed", "error": "scrape worker exited without returning a result"}
     try:
         logger.info("Task %s: starting scrape for %s", task_id, site.value)
         process.start()
+        started_writer.close()
+        if not started_reader.poll(max(0, min(5, deadline - time.monotonic()))):
+            raise TimeoutError("scrape worker did not establish process ownership")
+        process_group_id = started_reader.recv()
+        if os.name == "posix" and process_group_id != process.pid:
+            process_group_id = None
+            raise RuntimeError("scrape worker reported invalid process ownership")
+        result = result_queue.get(timeout=max(0, deadline - time.monotonic()))
+        # The scraper's context manager has already closed Playwright before it
+        # sends a result. Give the queue feeder/worker a bounded chance to exit.
+        process.join(timeout=max(0, min(2, deadline - time.monotonic())))
+    except queue.Empty:
+        result = {"status": "failed", "error": f"scrape exceeded request timeout of {timeout_seconds} seconds", "error_code": "scrape_timeout"}
+    except Exception as exc:
+        logger.exception("Task %s: scraper process failed", task_id)
+        result = {"status": "failed", "error": str(exc), "error_code": "scrape_failed"}
+    finally:
         try:
-            result = result_queue.get(timeout=timeout_seconds)
-        except queue.Empty:
-            timed_out = process.is_alive()
-            _terminate_scraper_worker(process)
-            error = (
-                f"scrape exceeded request timeout of {timeout_seconds} seconds"
-                if timed_out
-                else "scrape worker exited without returning a result"
-            )
-            _store_task(task_id, status="failed", error=error)
-            logger.error("Task %s: %s", task_id, error)
-            return
-
-        process.join(timeout=2)
-        if process.is_alive():
-            _terminate_scraper_worker(process)
+            cleaned = _terminate_scraper_worker(process, process_group_id)
+            if process.pid is not None and os.name == "posix" and process_group_id is None:
+                # Startup failed before ownership was acknowledged; descendants
+                # cannot safely be attributed. Let the watchdog recreate us.
+                cleaned = False
+            if _browser_processes() - browser_baseline:
+                cleaned = False
+        except Exception:
+            logger.exception("Task %s: cannot verify browser cleanup", task_id)
+            cleaned = False
+        handles_closed = _close_scraper_resources(started_reader, started_writer, result_queue)
+        # The parent never writes to this queue, so it has no feeder to join.
+        # Collect the exit code before closing multiprocessing's sentinel. Even
+        # failed descendant verification must not leak a finished worker handle.
+        exit_code = process.exitcode
+        if process.pid is None or exit_code is not None:
+            handles_closed = _close_scraper_resources(process) and handles_closed
+        cleaned = cleaned and handles_closed
+        if not cleaned:
+            CLEANUP_FAILED.set()
+            result = {"status": "failed", "error": "browser cleanup failed; JobSpy requires recovery", "error_code": "cleanup_failed"}
+            logger.error("Task %s: browser cleanup failed; refusing further scrapes", task_id)
+        elif result.get("status") == "completed" and exit_code != 0:
+            result = {"status": "failed", "error": "worker did not exit cleanly", "error_code": "scrape_failed"}
 
         if result.get("status") == "completed":
             jobs_data = result.get("data") or []
-            _store_task(
-                task_id,
-                status="completed",
-                count=len(jobs_data),
-                data=jobs_data,
-            )
-            logger.info("Task %s: completed with %s jobs", task_id, len(jobs_data))
-            return
-
-        error = str(result.get("error") or "scrape worker failed without an error message")
-        _store_task(task_id, status="failed", error=error)
-        logger.error("Task %s: scrape failed: %s", task_id, error)
-    except Exception as exc:
-        logger.exception("Task %s: scraper process failed", task_id)
-        _store_task(task_id, status="failed", error=str(exc))
-    finally:
-        _terminate_scraper_worker(process)
-        result_queue.close()
-        result_queue.join_thread()
-        SCRAPE_SEMAPHORE.release()
+            _store_task(task_id, status="completed", count=len(jobs_data), data=jobs_data)
+        else:
+            _store_task(task_id, status="failed", error=str(result.get("error") or "scrape failed"), error_code=result.get("error_code", "scrape_failed"))
+        if cleaned:
+            SCRAPE_SEMAPHORE.release()
 
 
 @app.post("/scrape", status_code=status.HTTP_202_ACCEPTED)
@@ -347,3 +425,13 @@ def health() -> dict[str, Any]:
         "jobs_in_memory": task_count,
         "allowed_sites": sorted(_allowed_sites()),
     }
+
+
+@app.get("/ready")
+def readiness() -> dict[str, Any]:
+    """Readiness is independent of the HTTP process being alive."""
+    if CLEANUP_FAILED.is_set():
+        raise HTTPException(status_code=503, detail={"ready": False, "reason": "cleanup_failed"})
+    with JOB_STORE_LOCK:
+        active = sum(task.get("status") == "processing" for task in JOB_STORE.values())
+    return {"ready": True, "active_scrapes": active}

@@ -1,15 +1,30 @@
-# Native ARM64 production image. The bundled Playwright Chromium variant passed
-# the TokyoDev/JapanDev OCI acceptance probe and avoids AMD64 Chrome under QEMU.
-FROM --platform=linux/arm64 python:3.11-slim
+# Native ARM64 production image with checksum-pinned stable Chrome.
+FROM --platform=linux/arm64 cgr.dev/chainguard/wolfi-base@sha256:08df5982c3d27e70a4ce1607e3bb9af09d746f8722cf135a7694afef879fc5a2
 
-ENV JOBSPY_PLAYWRIGHT_CHANNEL=bundled
+ENV JOBSPY_PLAYWRIGHT_CHANNEL=chrome \
+    PATH=/opt/venv/bin:$PATH
+
+# Patched glibc-based runtime libraries for headless Chrome. Avoid
+# installing a second distro Chromium or unused TLS impersonation binaries.
+RUN apk add --no-cache python-3.14 py3.14-pip libnss libnspr \
+    libatk-1.0 libatk-bridge-2.0 libudev font-opensans \
+    libdrm-libs libxkbcommon libx11 libxcomposite libxdamage libxext \
+    libxfixes libxrandr mesa-gbm alsa-lib cups-libs cairo pango dbus-libs \
+    glib libxcb libxshmfence fontconfig freetype \
+    && python3.14 -m venv /opt/venv
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir fastapi uvicorn \
-    && playwright install chromium --with-deps
+COPY requirements-api.txt .
+RUN pip install --no-cache-dir --require-hashes -r requirements-api.txt
+
+# Pin the complete stable browser so image scans identify its actual version.
+ADD --checksum=sha256:da83171e552650df34272a9c51f62182bae88d467d1ac19c92dd97917dfa0bca \
+    https://storage.googleapis.com/chrome-for-testing-public/154.0.8037.57/linux-arm64/chrome-linux-arm64.zip /tmp/chrome.zip
+RUN python -m zipfile -e /tmp/chrome.zip /opt/google \
+    && mv /opt/google/chrome-linux-arm64 /opt/google/chrome \
+    && chmod 755 /opt/google/chrome/chrome /opt/google/chrome/chrome_crashpad_handler /opt/google/chrome/chrome_sandbox \
+    && rm /tmp/chrome.zip
 
 COPY . .
 

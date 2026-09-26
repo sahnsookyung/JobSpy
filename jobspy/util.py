@@ -6,12 +6,18 @@ from itertools import cycle
 
 import numpy as np
 import requests
-import tls_client
 import urllib3
 from markdownify import markdownify as md
 from requests.adapters import HTTPAdapter, Retry
 
 from jobspy.model import CompensationInterval, JobType, Site
+
+try:
+    import tls_client
+except ImportError:
+    # The browser-only API image deliberately omits this native dependency.
+    # CLI installations retain it through the full requirements file.
+    tls_client = None
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -86,8 +92,10 @@ class RequestsRotating(RotatingProxySession, requests.Session):
         return requests.Session.request(self, method, url, **kwargs)
 
 
-class TLSRotating(RotatingProxySession, tls_client.Session):
+class TLSRotating(RotatingProxySession, tls_client.Session if tls_client is not None else object):
     def __init__(self, proxies=None):
+        if tls_client is None:
+            raise RuntimeError("TLS-based scrapers require the full JobSpy dependencies")
         RotatingProxySession.__init__(self, proxies=proxies)
         tls_client.Session.__init__(self, random_tls_extension_order=True)
 
