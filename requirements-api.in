@@ -1,0 +1,15 @@
+# The deployed API only enables Playwright sources; no native TLS impersonation client.
+fastapi==0.141.1
+starlette==1.7.0
+playwright==1.63.0
+numpy>=2.4,<3
+pandas>=2.3,<3
+pydantic>=2.12.5,<3
+beautifulsoup4>=4.14.3
+markdownify>=1.2.2
+requests>=2.32.5
+regex>=2024.11.6
+uvicorn>=0.40,<1
+anyio>=4.14.2
+urllib3>=2.7
+soupsieve>=2.9
